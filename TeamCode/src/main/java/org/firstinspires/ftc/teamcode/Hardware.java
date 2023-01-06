@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -27,6 +25,7 @@ public class Hardware {
     public Servo alignmentBarServo = null;
     public CRServo frontRollerServo = null;
     public CRServo backRollerServo = null;
+    int x;
 
     //hardwareMap
 
@@ -72,9 +71,9 @@ public class Hardware {
         frontLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         backLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        towerRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        towerLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        armMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        //towerRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        //towerLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        //armMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         frontRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         frontLeftMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
