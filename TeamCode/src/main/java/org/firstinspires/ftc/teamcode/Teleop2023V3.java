@@ -7,7 +7,13 @@ public class Teleop2023V3 extends OpMode{
     public void init() {
         //i exist and am real
     }
+    public void init_loop() {
 
+    }
+
+    public void start() {
+
+    }
     @Override
     public void loop() {
 
