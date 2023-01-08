@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-public class MechanumDrive {
+public class MecanumDrive {
     public DcMotorEx frontRightMotor=null;
     public DcMotorEx frontLeftMotor = null;
     public DcMotorEx backRightMotor = null;
     public DcMotorEx backLeftMotor = null;
 
-    public MechanumDrive(DcMotorEx frontRightMotor, DcMotorEx frontLeftMotor, DcMotorEx backRightMotor, DcMotorEx backLeftMotor) {
+    public MecanumDrive(DcMotorEx frontRightMotor, DcMotorEx frontLeftMotor, DcMotorEx backRightMotor, DcMotorEx backLeftMotor) {
 
         frontRightMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         frontLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
