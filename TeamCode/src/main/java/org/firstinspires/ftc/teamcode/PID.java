@@ -1,48 +1,51 @@
 package org.firstinspires.ftc.teamcode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class PID {
-    public DcMotorEx mainMotor=null;
-    public DcMotorEx slaveMotor = null;
-    double integralSum;
-    double Kp;
-    double Ki;
-    double Kd;
-    boolean slaveExists=false;
-    ElapsedTime timer= new ElapsedTime();
+
+    //public DcMotorEx slaveMotor = null;
+    double integralSum=0;
+    double Kp=0;
+    double Ki=0;
+    double Kd=0;
+    ElapsedTime timer = new ElapsedTime();
     double lastError = 0;
+    DcMotorEx allMotors[];
+    double error = 0;
 
-    public PID(DcMotorEx mainMotor) {
+    public PID(DcMotorEx... motor) {
 
-        mainMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        mainMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        mainMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        mainMotor.setPower(0);
+        allMotors = motor;
 
+        for (int motorIndex=0; motorIndex<motor.length; motorIndex++){
+            motor[motorIndex].setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor[motorIndex].setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            motor[motorIndex].setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            motor[motorIndex].setPower(0);
+        }
+
+    }    //Takes in x y and rotation each with range [-1,1] and sets the 4 corners of the DT to the correct power
+    public void setValues (double setKp, double setKi, double setKd){
+        Kp=setKp;
+        Ki=setKi;
+        Kd=setKd;
+    }
+    public void resetIntegralSum () {
         integralSum=0;
-        Kp=0;
-        Ki=0;
-        Kd=0;
+    }
 
-    }
-    public void AddSlave(DcMotorEx slaveMotor) {
-        slaveMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        slaveMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        slaveMotor.setPower(0);
-        slaveExists=true;
-    }
-    //Takes in x y and rotation each with range [-1,1] and sets the 4 corners of the DT to the correct power
+
     public void Iterate (double target) {
-        double error = target- mainMotor.getCurrentPosition();
+        lastError = error;
+        error = target- allMotors[0].getCurrentPosition();
         integralSum += error * timer.seconds();
         double derivative = (error - lastError) / timer.seconds();
         double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
-        mainMotor.setPower(output);
-        if (slaveExists) {
-            slaveMotor.setPower(output);
+        for (int motorIndex=0; motorIndex<allMotors.length; motorIndex++) {
+            allMotors[motorIndex].setPower(output);
         }
-
         timer.reset();
     }
 }

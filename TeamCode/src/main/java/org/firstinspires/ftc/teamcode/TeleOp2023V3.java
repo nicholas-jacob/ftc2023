@@ -49,11 +49,12 @@ public class TeleOp2023V3 extends OpMode{
         //setUp tower
         towerRight=hardwareMap.get(DcMotorEx.class, "towerRight");
         towerLeft=hardwareMap.get(DcMotorEx.class, "towerLeft");
-        PID tower=new PID(towerRight);
-        tower.AddSlave(towerLeft);
+        PID tower=new PID(towerRight,towerLeft);
+
 
         towerRight.setDirection(DcMotorEx.Direction.FORWARD);
         towerLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        tower.setValues(1,0,0);
         tower.Iterate(100);
 
         //setUp arm
@@ -61,6 +62,7 @@ public class TeleOp2023V3 extends OpMode{
         PID arm=new PID(armMotor);
 
         armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        arm.setValues(1,0,0);
         arm.Iterate(100);
 
 
