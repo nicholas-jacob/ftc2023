@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -14,7 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 @TeleOp
-public class TeleOp2023V3 extends OpMode{
+public class TeleOp2023V3 extends OpMode {
 
     //DT
     //used to have =null but dont think that is nesecary now
@@ -41,7 +42,7 @@ public class TeleOp2023V3 extends OpMode{
     public static double Af = 0;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 28*(2.89655)*(3.61905)*(5.23077)*(2.4)/(2*Math.PI);
+    private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
 
@@ -52,28 +53,30 @@ public class TeleOp2023V3 extends OpMode{
     private CRServo backRollerServo = null;
 
     private ElapsedTime runtime = new ElapsedTime();
+    private InverseKinematics inverseKinematics = new InverseKinematics();
+
 
     @Override
     public void init() {
 
         //set up mecanum drive
-        frontRightMotor=hardwareMap.get(DcMotorEx.class, "frontRightMotor");
-        frontLeftMotor=hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
-        backRightMotor=hardwareMap.get(DcMotorEx.class, "backRightMotor");
-        backLeftMotor=hardwareMap.get(DcMotorEx.class, "backLeftMotor");
-        MecanumDrive mecanum=new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "backRightMotor");
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
+        MecanumDrive mecanum = new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
 
         frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        mecanum.Drive(1,1,1);
+        mecanum.Drive(1, 1, 1);
 
 
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
-        towerRight=hardwareMap.get(DcMotorEx.class, "towerRight");
-        towerLeft=hardwareMap.get(DcMotorEx.class, "towerLeft");
+        towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
+        towerLeft = hardwareMap.get(DcMotorEx.class, "towerLeft");
 
         towerRight.setDirection(DcMotorEx.Direction.FORWARD);
         towerLeft.setDirection(DcMotorEx.Direction.REVERSE);
@@ -85,20 +88,17 @@ public class TeleOp2023V3 extends OpMode{
 
         //setUp arm
         armController = new PIDController(Ap, Ai, Ad);
-        armMotor=hardwareMap.get(DcMotorEx.class, "armMotor");
+        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
         armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
 
-
-
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         frontRollerServo = hardwareMap.get(CRServo.class, "frontRollerServo");
         backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
-
 
 
         //ftc dashboard stuff
@@ -112,6 +112,7 @@ public class TeleOp2023V3 extends OpMode{
     public void start() {
 
     }
+
     @Override
     public void loop() {
 
@@ -137,17 +138,11 @@ public class TeleOp2023V3 extends OpMode{
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
 
-
-
-
-
-
-
+        inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0, 0), new ArmTowerPosition(0, 0));
 
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
         telemetry.addData("armTarget", armTarget);
-
 
 
         telemetry.update();
