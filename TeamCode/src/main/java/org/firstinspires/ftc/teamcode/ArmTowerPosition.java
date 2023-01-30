@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 public class ArmTowerPosition {
-    private Double armPosition;
-    private Double towerPosition;
+    private double armPosition;
+    private double towerPosition;
 
     public ArmTowerPosition() {
     }

@@ -138,7 +138,7 @@ public class TeleOp2023V3 extends OpMode {
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
 
-        inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0, 0), new ArmTowerPosition(0, 0));
+        inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0.0, 0.0), new ArmTowerPosition(0.0, 0.0));
 
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
