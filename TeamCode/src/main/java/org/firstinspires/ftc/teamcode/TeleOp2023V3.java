@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Config
+//@Config
 @TeleOp
 public class TeleOp2023V3 extends OpMode {
 
@@ -53,7 +53,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo = null;
 
     private ElapsedTime runtime = new ElapsedTime();
-    private InverseKinematics inverseKinematics = new InverseKinematics();
+    //private InverseKinematics inverseKinematics = new InverseKinematics();
 
 
     @Override
@@ -74,7 +74,7 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //setUp tower
-        twController = new PIDController(Tp, Ti, Td);
+        //twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
         towerLeft = hardwareMap.get(DcMotorEx.class, "towerLeft");
 
@@ -87,7 +87,7 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //setUp arm
-        armController = new PIDController(Ap, Ai, Ad);
+        //armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
@@ -102,7 +102,7 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //ftc dashboard stuff
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        //telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
 
     public void init_loop() {
@@ -120,25 +120,25 @@ public class TeleOp2023V3 extends OpMode {
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         //tower controller
-        twController.setPID(Tp, Ti, Td);
+        //twController.setPID(Tp, Ti, Td);
         int towerPos = towerRight.getCurrentPosition();
-        double towerPid = twController.calculate(towerPos, twTarget);
+        //double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
 
-        double towerPower = towerPid + towerFf;
+        double towerPower = 0;//towerPid + towerFf;
         towerRight.setPower(towerPower);
         towerLeft.setPower(towerPower);
 
         //arm controller
-        armController.setPID(Ap, Ai, Ad);
+        //armController.setPID(Ap, Ai, Ad);
         int armPos = armMotor.getCurrentPosition();
-        double armPid = armController.calculate(armPos, armTarget);
-        double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+        //double armPid = armController.calculate(armPos, armTarget);
+        //double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
 
-        double armPower = armPid + armFf;
+        double armPower = 0;//armPid + armFf;
         armMotor.setPower(armPower);
 
-        inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0.0, 0.0), new ArmTowerPosition(0.0, 0.0));
+        //inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0.0, 0.0), new ArmTowerPosition(0.0, 0.0));
 
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
