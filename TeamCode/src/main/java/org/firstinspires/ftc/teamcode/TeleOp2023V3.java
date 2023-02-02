@@ -1,21 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
-//import com.acmerobotics.dashboard.FtcDashboard;
-//import com.acmerobotics.dashboard.config.Config;
-//import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-//@Config
+
+
+@Config
 @TeleOp
 public class TeleOp2023V3 extends OpMode {
+    // if auto was just ran set true else set flase
+    private final boolean auto=false;
 
     //DT
     //used to have =null but dont think that is nesecary now
@@ -45,14 +47,16 @@ public class TeleOp2023V3 extends OpMode {
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
+    private double targetX=0;
+    private double targetY=0;
 
     //GR
-    private Servo gripperRotationServo = null;
-    private Servo alignmentBarServo = null;
-    private CRServo frontRollerServo = null;
-    private CRServo backRollerServo = null;
+    private Servo gripperRotationServo;
+    private Servo alignmentBarServo;
+    private CRServo frontRollerServo;
+    private CRServo backRollerServo;
 
-    private ElapsedTime runtime = new ElapsedTime();
+    //private ElapsedTime runtime = new ElapsedTime();
     //private InverseKinematics inverseKinematics = new InverseKinematics();
 
 
@@ -70,11 +74,15 @@ public class TeleOp2023V3 extends OpMode {
         backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        mecanum.Drive(1, 1, 1);
 
+        //setUpServos
+        frontRollerServo = hardwareMap.get(CRServo.class, "frontRollerServo");
+        backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
+        alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
+        gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
 
         //setUp tower
-        //twController = new PIDController(Tp, Ti, Td);
+        twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
         towerLeft = hardwareMap.get(DcMotorEx.class, "towerLeft");
 
@@ -82,30 +90,76 @@ public class TeleOp2023V3 extends OpMode {
         towerLeft.setDirection(DcMotorEx.Direction.REVERSE);
         towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        towerLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+
 
 
         //setUp arm
-        //armController = new PIDController(Ap, Ai, Ad);
+        armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
         armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+
+        //reset encoders only if auto wasn't just run
+        if (auto==false){
+            towerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            towerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
+        towerRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        towerLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        towerRight.setPower(0);
+        towerLeft.setPower(0);
         armMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
-        alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
-        frontRollerServo = hardwareMap.get(CRServo.class, "frontRollerServo");
-        backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
-
+        armMotor.setPower(0);
 
         //ftc dashboard stuff
-        //telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
 
     public void init_loop() {
+        //inverse kinematics
+        int towerPos = towerRight.getCurrentPosition();
+        int armPos = armMotor.getCurrentPosition();
+
+        //set targets
+        if (auto) {
+            armMotor.setPower(0);
+            towerRight.setPower(0);
+            towerLeft.setPower(0);
+        }
+        else {
+            double Xtarget=500;
+            double Ytarget=-200;
+
+            //calculate with invserse kinematics here
+
+            //tower controller
+            twController.setPID(Tp, Ti, Td);
+
+            double towerPid = twController.calculate(towerPos, twTarget);
+            double towerFf = Tf;
+
+            double towerPower = towerPid + towerFf;
+            towerRight.setPower(towerPower);
+            towerLeft.setPower(towerPower);
+
+            //arm controller
+            armController.setPID(Ap, Ai, Ad);
+
+            double armPid = armController.calculate(armPos, armTarget);
+            double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+
+            double armPower = armPid + armFf;
+            armMotor.setPower(armPower);
+
+            //set servos
+            gripperRotationServo.setPosition(1);
+            alignmentBarServo.setPosition(0.5);
+        }
+
 
     }
 
@@ -119,31 +173,38 @@ public class TeleOp2023V3 extends OpMode {
         //dt code
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
-        //tower controller
-        //twController.setPID(Tp, Ti, Td);
+        //inverse kinematics
         int towerPos = towerRight.getCurrentPosition();
-        //double towerPid = twController.calculate(towerPos, twTarget);
+        int armPos = armMotor.getCurrentPosition();
+        //calculate with inverse kinematics here
+
+
+        //tower controller
+        twController.setPID(Tp, Ti, Td);
+        double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
 
-        double towerPower = 0;//towerPid + towerFf;
+        double towerPower = towerPid + towerFf;
         towerRight.setPower(towerPower);
         towerLeft.setPower(towerPower);
 
         //arm controller
-        //armController.setPID(Ap, Ai, Ad);
-        int armPos = armMotor.getCurrentPosition();
-        //double armPid = armController.calculate(armPos, armTarget);
-        //double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+        armController.setPID(Ap, Ai, Ad);
 
-        double armPower = 0;//armPid + armFf;
+        double armPid = armController.calculate(armPos, armTarget);
+        double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+
+        double armPower = armPid + armFf;
         armMotor.setPower(armPower);
 
-        //inverseKinematics.inverse(new Position(0, 0), new Position(0, 0), new ArmTowerPosition(0.0, 0.0), new ArmTowerPosition(0.0, 0.0));
 
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
         telemetry.addData("armTarget", armTarget);
 
+        //uncomment for tower tuning
+        telemetry.addData("twPos", towerPos);
+        telemetry.addData("towerTarget", twTarget);
 
         telemetry.update();
     }

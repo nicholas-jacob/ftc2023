@@ -3,10 +3,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 public class MecanumDrive {
-    public DcMotorEx frontRightMotor=null;
-    public DcMotorEx frontLeftMotor = null;
-    public DcMotorEx backRightMotor = null;
-    public DcMotorEx backLeftMotor = null;
+    public DcMotorEx frontRightMotor;
+    public DcMotorEx frontLeftMotor;
+    public DcMotorEx backRightMotor;
+    public DcMotorEx backLeftMotor;
 
     public MecanumDrive(DcMotorEx frontRightMotor, DcMotorEx frontLeftMotor, DcMotorEx backRightMotor, DcMotorEx backLeftMotor) {
 
