@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -12,12 +13,18 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
+import java.util.List;
+
+
 
 @Config
 @TeleOp
 public class TeleOp2023V3 extends OpMode {
     // if auto was just ran set true else set flase
     private final boolean auto=false;
+
+
+
 
     //DT
     //used to have =null but dont think that is nesecary now
@@ -55,14 +62,21 @@ public class TeleOp2023V3 extends OpMode {
     private Servo alignmentBarServo;
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
+    private int retractAlignmentBar = 0;
 
     private InverseKinematics inverseKinematics;
+
 
 
 
     @Override
     public void init() {
 
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
         //set up mecanum drive
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
@@ -187,10 +201,73 @@ public class TeleOp2023V3 extends OpMode {
         double targetYLast=targetY;
 
 
+        //intakePosition
+        if (gamepad2.right_bumper){
+            targetX=414.6;
+            targetY=-140.9;
+            alignmentBarServo.setPosition(0.73111);
+        }
+        //groundJunction
+        if (gamepad2.dpad_down){
+            targetX=-133.9373;
+            targetY=-157.6818;
+            alignmentBarServo.setPosition(0.73111);
+        }
+        //lowJunction
+        if (gamepad2.dpad_left){
+            targetX=-483.1;
+            targetY=773.17;
+            alignmentBarServo.setPosition(0.73111);
+        }
+        //midJunction
+        if (gamepad2.dpad_right){
+            targetX=447.9;
+            targetY=-248.1;
+            alignmentBarServo.setPosition(0.73111);
+
+        }
+        //highJunction
+        if (gamepad2.dpad_up){
+            targetX=15;
+            targetY=722.4;
+            alignmentBarServo.setPosition(0.73111);
+        }
+
+        targetX+=(gamepad2.left_stick_x)*4;
+        targetY+=(gamepad2.left_stick_y)*4;
+
+        if (gamepad2.a){
+            frontRollerServo.setPower(0.3);
+            backRollerServo.setPower(1);
+            alignmentBarServo.setPosition(0.73111);
+
+        }
+        else{
+            if (gamepad2.b){
+                frontRollerServo.setPower(-0.3);
+                backRollerServo.setPower(-1);
+                retractAlignmentBar=5;
+            }
+            else{
+                frontRollerServo.setPower(0.1);
+                backRollerServo.setPower(0.1);
+            }
+        }
+
+        if (retractAlignmentBar > 0) {
+            if (retractAlignmentBar == 1) {
+                alignmentBarServo.setPosition(0.73111);
+            }
+            retractAlignmentBar -= 1;
+        }
+
+
+
+
+
+
 
         //calculate with inverse kinematics
-        int armTargetLast=armTarget;
-        int twTargetLast=twTarget;
         if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
             armTarget=inverseKinematics.armTarget;
             twTarget=inverseKinematics.towerTarget;
@@ -229,5 +306,9 @@ public class TeleOp2023V3 extends OpMode {
         telemetry.addData("towerTarget", twTarget);
 
         telemetry.update();
+
     }
+
+
+
 }
