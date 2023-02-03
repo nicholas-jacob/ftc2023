@@ -5,8 +5,8 @@ public class InverseKinematics {
     private double armLength=542.75588018;
     private double TPR=0;
     private double TPMM=0;
-    public double armTarget=0;
-    public double towerTarget=0;
+    public int armTarget=0;
+    public int towerTarget=0;
 
     public InverseKinematics (double ticksPerRadian, double ticksPerMM){
         TPR=ticksPerRadian;
@@ -39,24 +39,24 @@ public class InverseKinematics {
             double armChange2 = Math.abs(armP2*TPR-armPos);
 
             if (armChange1<armChange2){
-                armTarget=armP1;
-                towerTarget=towerP1;
+                armTarget=(int)Math.round(armP1*TPR);
+                towerTarget=(int)Math.round(towerP1*TPMM);
                 return true;
             }
             else {
-                armTarget=armP2;
-                towerTarget=towerP2;
+                armTarget=(int)Math.round(armP2*TPR);
+                towerTarget=(int)Math.round(towerP2*TPMM);
                 return true;
             }
         }
         else if(positionValid1){
-            armTarget=armP1;
-            towerTarget=towerP1;
+            armTarget=(int)Math.round(armP1*TPR);
+            towerTarget=(int)Math.round(towerP1*TPMM);
             return true;
         }
         else if(positionValid2){
-            armTarget=armP2;
-            towerTarget=towerP2;
+            armTarget=(int)Math.round(armP2*TPR);
+            towerTarget=(int)Math.round(towerP2*TPMM);
             return true;
         }
         else {

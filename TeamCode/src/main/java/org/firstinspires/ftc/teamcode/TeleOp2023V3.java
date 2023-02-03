@@ -56,8 +56,8 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
 
-    //private ElapsedTime runtime = new ElapsedTime();
-    //private InverseKinematics inverseKinematics = new InverseKinematics();
+    private InverseKinematics inverseKinematics;
+
 
 
     @Override
@@ -101,9 +101,10 @@ public class TeleOp2023V3 extends OpMode {
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
         armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+        inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
         //reset encoders only if auto wasn't just run
-        if (auto==false){
+        if (!auto){
             towerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             towerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -131,10 +132,16 @@ public class TeleOp2023V3 extends OpMode {
             towerLeft.setPower(0);
         }
         else {
-            double Xtarget=500;
-            double Ytarget=-200;
+            targetX=288.43871245;
+            targetY=-340.67571868;
 
             //calculate with invserse kinematics here
+            int armTargetLast=armTarget;
+            int twTargetLast=twTarget;
+            if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
+                armTarget=inverseKinematics.armTarget;
+                twTarget=inverseKinematics.towerTarget;
+            }
 
             //tower controller
             twController.setPID(Tp, Ti, Td);
@@ -173,10 +180,25 @@ public class TeleOp2023V3 extends OpMode {
         //dt code
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
-        //inverse kinematics
+        // finite state machine goes here
         int towerPos = towerRight.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
-        //calculate with inverse kinematics here
+        double targetXLast=targetX;
+        double targetYLast=targetY;
+
+
+
+        //calculate with inverse kinematics
+        int armTargetLast=armTarget;
+        int twTargetLast=twTarget;
+        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
+            armTarget=inverseKinematics.armTarget;
+            twTarget=inverseKinematics.towerTarget;
+        }
+        else {
+            targetX=targetXLast;
+            targetY=targetYLast;
+        }
 
 
         //tower controller
