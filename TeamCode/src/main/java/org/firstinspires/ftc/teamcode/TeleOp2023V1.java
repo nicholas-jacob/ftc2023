@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-​
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -107,7 +106,6 @@ public class TeleOp2023V1 extends OpMode
         gripperRotationServo.setPosition(1);
         alignmentBarServo.setPosition(0.5);
     }
-​
     /*
      * Code to run ONCE when the driver hits PLAY
      */
@@ -115,7 +113,6 @@ public class TeleOp2023V1 extends OpMode
     public void start() {
         runtime.reset();
     }
-​
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
