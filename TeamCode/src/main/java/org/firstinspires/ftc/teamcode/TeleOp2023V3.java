@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -63,7 +64,8 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
-
+    private final double alignmentBarDownPos = 0;
+    private final double alignmentBarUpPos = 0.5;
     private InverseKinematics inverseKinematics;
 
 
@@ -78,11 +80,11 @@ public class TeleOp2023V3 extends OpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
         //set up mecanum drive
-        frontRightMotor = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
-        backRightMotor = hardwareMap.get(DcMotorEx.class, "backRightMotor");
-        backLeftMotor = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
-        MecanumDrive mecanum = new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "motorFrontRight");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "motorFrontLeft");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "motorBackRight");
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "motorBackLeft");
+        mecanum = new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
 
         frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -100,10 +102,10 @@ public class TeleOp2023V3 extends OpMode {
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
         towerLeft = hardwareMap.get(DcMotorEx.class, "towerLeft");
 
-        towerRight.setDirection(DcMotorEx.Direction.FORWARD);
-        towerLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setDirection(DcMotorEx.Direction.REVERSE);
+        towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
 
 
@@ -113,7 +115,7 @@ public class TeleOp2023V3 extends OpMode {
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -171,9 +173,9 @@ public class TeleOp2023V3 extends OpMode {
             armController.setPID(Ap, Ai, Ad);
 
             double armPid = armController.calculate(armPos, armTarget);
-            double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+            double armFf = Math.sin(armPos / ticksPerRadian) * Af;
 
-            double armPower = armPid + armFf;
+            double armPower = armPid - armFf;
             armMotor.setPower(armPower);
 
             //set servos
@@ -188,10 +190,12 @@ public class TeleOp2023V3 extends OpMode {
 
     }
 
+
     @Override
     public void loop() {
 
         //dt code
+        System.out.println(gamepad1.left_stick_x);
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         // finite state machine goes here
@@ -205,32 +209,32 @@ public class TeleOp2023V3 extends OpMode {
         if (gamepad2.right_bumper){
             targetX=414.6;
             targetY=-140.9;
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //groundJunction
         if (gamepad2.dpad_down){
             targetX=-133.9373;
             targetY=-157.6818;
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=-483.1;
             targetY=773.17;
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //midJunction
         if (gamepad2.dpad_right){
             targetX=447.9;
             targetY=-248.1;
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         //highJunction
         if (gamepad2.dpad_up){
             targetX=15;
             targetY=722.4;
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
         }
 
         targetX+=(gamepad2.left_stick_x)*4;
@@ -239,7 +243,7 @@ public class TeleOp2023V3 extends OpMode {
         if (gamepad2.a){
             frontRollerServo.setPower(0.3);
             backRollerServo.setPower(1);
-            alignmentBarServo.setPosition(0.73111);
+            alignmentBarServo.setPosition(0.5);
 
         }
         else{
@@ -253,10 +257,15 @@ public class TeleOp2023V3 extends OpMode {
                 backRollerServo.setPower(0.1);
             }
         }
-
+        if (gamepad2.x){
+            alignmentBarServo.setPosition(alignmentBarDownPos);
+        }
+        if (gamepad2.y){
+            alignmentBarServo.setPosition(alignmentBarUpPos);
+        }
         if (retractAlignmentBar > 0) {
             if (retractAlignmentBar == 1) {
-                alignmentBarServo.setPosition(0.73111);
+                alignmentBarServo.setPosition(alignmentBarUpPos);
             }
             retractAlignmentBar -= 1;
         }
@@ -268,14 +277,14 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //calculate with inverse kinematics
-        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
-            armTarget=inverseKinematics.armTarget;
-            twTarget=inverseKinematics.towerTarget;
-        }
-        else {
-            targetX=targetXLast;
-            targetY=targetYLast;
-        }
+        //if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
+            //armTarget=inverseKinematics.armTarget;
+            //twTarget=inverseKinematics.towerTarget;
+        //}
+        //else {
+            //targetX=targetXLast;
+            //targetY=targetYLast;
+        //}
 
 
         //tower controller
@@ -291,7 +300,7 @@ public class TeleOp2023V3 extends OpMode {
         armController.setPID(Ap, Ai, Ad);
 
         double armPid = armController.calculate(armPos, armTarget);
-        double armFf = Math.cos(armTarget / ticksPerRadian) * Af;
+        double armFf = Math.sin((armPos / ticksPerRadian)) * Af;
 
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
@@ -300,6 +309,7 @@ public class TeleOp2023V3 extends OpMode {
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
         telemetry.addData("armTarget", armTarget);
+        telemetry.addData("armPower", armPower);
 
         //uncomment for tower tuning
         telemetry.addData("twPos", towerPos);
