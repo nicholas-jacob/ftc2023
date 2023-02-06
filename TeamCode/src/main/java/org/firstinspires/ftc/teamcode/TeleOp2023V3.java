@@ -175,7 +175,7 @@ public class TeleOp2023V3 extends OpMode {
             double armPid = armController.calculate(armPos, armTarget);
             double armFf = Math.sin(armPos / ticksPerRadian) * Af;
 
-            double armPower = armPid - armFf;
+            double armPower = armPid + armFf;
             armMotor.setPower(armPower);
 
             //set servos
