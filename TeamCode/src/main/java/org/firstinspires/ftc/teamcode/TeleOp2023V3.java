@@ -37,8 +37,8 @@ public class TeleOp2023V3 extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp = 0, Ti = 0, Td = 0;
-    public static double Tf = 0;
+    public static double Tp = 0.04, Ti = 0, Td = 0.0016;
+    public static double Tf = 0.15;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -48,8 +48,8 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0, Ai = 0, Ad = 0;
-    public static double Af = 0;
+    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.13;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
@@ -173,7 +173,7 @@ public class TeleOp2023V3 extends OpMode {
             armController.setPID(Ap, Ai, Ad);
 
             double armPid = armController.calculate(armPos, armTarget);
-            double armFf = Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+            double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
             double armPower = armPid + armFf;
             armMotor.setPower(armPower);
@@ -277,14 +277,14 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //calculate with inverse kinematics
-        //if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
-            //armTarget=inverseKinematics.armTarget;
-            //twTarget=inverseKinematics.towerTarget;
-        //}
-        //else {
-            //targetX=targetXLast;
-            //targetY=targetYLast;
-        //}
+        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
+            armTarget=inverseKinematics.armTarget;
+            twTarget=inverseKinematics.towerTarget;
+        }
+        else {
+            targetX=targetXLast;
+            targetY=targetYLast;
+        }
 
 
         //tower controller
@@ -300,7 +300,7 @@ public class TeleOp2023V3 extends OpMode {
         armController.setPID(Ap, Ai, Ad);
 
         double armPid = armController.calculate(armPos, armTarget);
-        double armFf = Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
