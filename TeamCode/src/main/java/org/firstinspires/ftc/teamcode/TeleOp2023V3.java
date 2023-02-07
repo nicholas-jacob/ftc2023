@@ -37,8 +37,8 @@ public class TeleOp2023V3 extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp = 0, Ti = 0, Td = 0;
-    public static double Tf = 0;
+    public static double Tp=0.03, Ti = 0, Td = 0.0014;
+    public static double Tf = 0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -48,8 +48,8 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0, Ai = 0, Ad = 0;
-    public static double Af = 0;
+    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.13;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
@@ -67,6 +67,7 @@ public class TeleOp2023V3 extends OpMode {
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.5;
     private InverseKinematics inverseKinematics;
+    public static double gripperRotationServoPosition=1;
 
 
 
@@ -96,7 +97,7 @@ public class TeleOp2023V3 extends OpMode {
         backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
-
+        gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
@@ -104,8 +105,8 @@ public class TeleOp2023V3 extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 
 
@@ -115,7 +116,7 @@ public class TeleOp2023V3 extends OpMode {
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -140,7 +141,8 @@ public class TeleOp2023V3 extends OpMode {
         //inverse kinematics
         int towerPos = towerRight.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
-
+        twController.setPID(Tp, Ti, Td);
+        armController.setPID(Ap, Ai, Ad);
         //set targets
         if (auto) {
             armMotor.setPower(0);
@@ -160,7 +162,6 @@ public class TeleOp2023V3 extends OpMode {
             }
 
             //tower controller
-            twController.setPID(Tp, Ti, Td);
 
             double towerPid = twController.calculate(towerPos, twTarget);
             double towerFf = Tf;
@@ -173,21 +174,25 @@ public class TeleOp2023V3 extends OpMode {
             armController.setPID(Ap, Ai, Ad);
 
             double armPid = armController.calculate(armPos, armTarget);
-            double armFf = Math.sin(armPos / ticksPerRadian) * Af;
+            double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
-            double armPower = armPid - armFf;
+            double armPower = armPid + armFf;
             armMotor.setPower(armPower);
 
             //set servos
-            gripperRotationServo.setPosition(1);
+            gripperRotationServo.setPosition(gripperRotationServoPosition);
             alignmentBarServo.setPosition(0.5);
+            telemetry.addData("armTarget", armTarget);
+            telemetry.addData("armPos", armPos);
+            telemetry.addData("towerTarget", twTarget);
+            telemetry.addData("towerPos", towerPos);
         }
-
+        telemetry.update();
 
     }
 
     public void start() {
-
+        gripperRotationServoPosition=0.35;
     }
 
 
@@ -238,17 +243,17 @@ public class TeleOp2023V3 extends OpMode {
         }
 
         targetX+=(gamepad2.left_stick_x)*4;
-        targetY+=(gamepad2.left_stick_y)*4;
+        targetY-=(gamepad2.left_stick_y)*4;
 
         if (gamepad2.a){
-            frontRollerServo.setPower(0.3);
+            frontRollerServo.setPower(1);
             backRollerServo.setPower(1);
             alignmentBarServo.setPosition(0.5);
 
         }
         else{
             if (gamepad2.b){
-                frontRollerServo.setPower(-0.3);
+                frontRollerServo.setPower(-1);
                 backRollerServo.setPower(-1);
                 retractAlignmentBar=5;
             }
@@ -269,6 +274,7 @@ public class TeleOp2023V3 extends OpMode {
             }
             retractAlignmentBar -= 1;
         }
+        gripperRotationServo.setPosition(gripperRotationServoPosition);
 
 
 
@@ -277,14 +283,14 @@ public class TeleOp2023V3 extends OpMode {
 
 
         //calculate with inverse kinematics
-        //if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
-            //armTarget=inverseKinematics.armTarget;
-            //twTarget=inverseKinematics.towerTarget;
-        //}
-        //else {
-            //targetX=targetXLast;
-            //targetY=targetYLast;
-        //}
+        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
+            armTarget=inverseKinematics.armTarget;
+            twTarget=inverseKinematics.towerTarget;
+        }
+        else {
+            targetX=targetXLast;
+            targetY=targetYLast;
+        }
 
 
         //tower controller
@@ -300,7 +306,7 @@ public class TeleOp2023V3 extends OpMode {
         armController.setPID(Ap, Ai, Ad);
 
         double armPid = armController.calculate(armPos, armTarget);
-        double armFf = Math.sin((armPos / ticksPerRadian)) * Af;
+        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
@@ -314,6 +320,7 @@ public class TeleOp2023V3 extends OpMode {
         //uncomment for tower tuning
         telemetry.addData("twPos", towerPos);
         telemetry.addData("towerTarget", twTarget);
+        telemetry.addData("towerPower", towerPower);
 
         telemetry.update();
 
