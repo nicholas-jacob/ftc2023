@@ -44,7 +44,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.8898; // in
     //mutilpled by gear ratio/final x from straight test because distance traveled was off
-    public static double GEAR_RATIO = 0.8333333333333334 * (84/60); // output (wheel) speed / input (motor) speed
+    public static double GEAR_RATIO = 1.1666666666666666666666666667; // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 8.90; // in
 
     /*
