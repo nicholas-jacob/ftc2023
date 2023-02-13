@@ -46,7 +46,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import java.util.ArrayList;
 
 @Autonomous
-public abstract class cameraCode extends OpMode {
+public class cameraCode extends OpMode {
 
     int state=0;
     //camera stuff
@@ -79,33 +79,15 @@ public abstract class cameraCode extends OpMode {
     SampleMecanumDrive drive = null;
 
     //points of interest
-    Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
-    Pose2d leftParkPose = new Pose2d( -36, 60, Math.toRadians(0));
-    Pose2d middleParkPose = new Pose2d (0, 27, Math.toRadians(0));
-    Pose2d rightParkPose = new Pose2d (36, 12, Math.toRadians(0));
-    Trajectory middlePark = drive.trajectoryBuilder(startPose)
-            .lineToLinearHeading(middleParkPose)
-            .addDisplacementMarker(() -> {
-                state+=1;
-            })
 
-            .build();
-    Trajectory leftPark = drive.trajectoryBuilder(startPose)
-            .addDisplacementMarker(() -> drive.followTrajectoryAsync(middlePark))
-            .lineToLinearHeading(leftParkPose)
-            .addDisplacementMarker(() -> {
-                state+=1;
-            })
-            .build();
-    Trajectory rightPark = drive.trajectoryBuilder(startPose)
-            .addDisplacementMarker(() -> drive.followTrajectoryAsync(middlePark))
-            .lineToLinearHeading(rightParkPose)
-            .addDisplacementMarker(() -> {
-                state+=1;
-            })
-            .build();
+    Pose2d startPose=null;
+    Pose2d leftParkPose=null;
+    Pose2d middleParkPose=null;
+    Pose2d rightParkPose=null;
+    Trajectory middlePark=null;
+    Trajectory leftPark=null;
+    Trajectory rightPark=null;
 
-    //finite state machine
 
 
     public void init() {
@@ -132,9 +114,40 @@ public abstract class cameraCode extends OpMode {
         telemetry.setMsTransmissionInterval(50);
 
 
+        //roadrunner stuff
+
+        //roadrunner setup
+        drive = new SampleMecanumDrive(hardwareMap);
+
+
+        startPose = new Pose2d(0, 0, Math.toRadians(0));
+        leftParkPose = new Pose2d( 27, 24);
+        middleParkPose = new Pose2d (27, 0);
+        rightParkPose = new Pose2d (27, -24);
+        middlePark = drive.trajectoryBuilder(startPose)
+                .lineToLinearHeading(middleParkPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+
+                .build();
+        leftPark = drive.trajectoryBuilder(middlePark.end())
+                .lineToLinearHeading(leftParkPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        rightPark = drive.trajectoryBuilder(middlePark.end())
+                .lineToLinearHeading(rightParkPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        drive.setPoseEstimate(startPose);
 
 
     }
+
 
     public void init_loop() {
 
@@ -167,18 +180,27 @@ public abstract class cameraCode extends OpMode {
                 }
             }
 
-        } else {
             telemetry.addLine("Don't see tag of interest :(");
 
-            if (tagOfInterest == null) {
-                telemetry.addLine("(The tag has never been seen)");
-            } else {
-                telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                //tagToTelemetry(tagOfInterest);
-            }
+
 
         }
-
+        if (tagOfInterest != null) {
+            if (tagOfInterest.id == left) {
+                telemetry.addLine("will go left");
+                signal = left;
+            } else if (tagOfInterest.id == right) {
+                telemetry.addLine("will go right");
+                signal = right;
+                //tagToTelemetry(tagOfInterest);
+            } else if (tagOfInterest.id == middle) {
+                telemetry.addLine("will go middle");
+                signal = middle;
+            }
+        } else {
+            telemetry.addLine("will go middle Bc didn't find anything");
+            signal = middle;
+        }
         telemetry.update();
     }
 
@@ -200,17 +222,7 @@ public abstract class cameraCode extends OpMode {
             telemetry.update();
         }
 
-        if (tagOfInterest.id == left) {
-            signal = left;
-        } else if (tagOfInterest == null || tagOfInterest.id == middle) {
-            signal = middle;
-        } else if (tagOfInterest.id == left) {
-            signal = right;
-        }
 
-        //roadrunner setup
-        drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(startPose);
 
         //finite state machine reset
     }
@@ -218,11 +230,12 @@ public abstract class cameraCode extends OpMode {
 
     public void loop(){
         if (state==0){
+            drive.followTrajectoryAsync(middlePark);
+            state+=1;
+        }
+        else if (state==2){
             if (signal == left) {
                 drive.followTrajectoryAsync(leftPark);
-            }
-            else if (signal == middle) {
-                drive.followTrajectoryAsync(middlePark);
             }
             else if (signal == right) {
                 drive.followTrajectoryAsync(rightPark);
