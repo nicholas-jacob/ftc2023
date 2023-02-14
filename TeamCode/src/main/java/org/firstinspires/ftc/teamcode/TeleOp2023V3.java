@@ -22,7 +22,7 @@ import java.util.List;
 @TeleOp
 public class TeleOp2023V3 extends OpMode {
     // if auto was just ran set true else set flase
-    private final boolean auto=false;
+    private final boolean auto=true;
 
 
 
@@ -200,7 +200,6 @@ public class TeleOp2023V3 extends OpMode {
     public void loop() {
 
         //dt code
-        System.out.println(gamepad1.left_stick_x);
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         // finite state machine goes here
