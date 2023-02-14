@@ -36,9 +36,10 @@ public class TeleOp2023V3 extends OpMode {
     private DcMotorEx backLeftMotor;
 
     //TW
+    public static double armMaxVelocity=500;
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.27;
+    public static double Tp=0, Ti=0, Td=0;//Tp=0.03, Ti = 0, Td = 0.0014;
+    public static double Tf = 0;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -48,6 +49,7 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
+    public static double armMaxPower = 0.5;
     public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
     public static double Af = 0.13;
 
@@ -65,7 +67,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.8;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -306,6 +308,12 @@ public class TeleOp2023V3 extends OpMode {
         armController.setPID(Ap, Ai, Ad);
 
         double armPid = armController.calculate(armPos, armTarget);
+        if (armPid>armMaxPower){
+            armPid=armMaxPower;
+        }
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
         double armPower = armPid + armFf;
