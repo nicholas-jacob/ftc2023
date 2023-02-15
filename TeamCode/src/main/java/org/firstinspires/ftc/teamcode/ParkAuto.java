@@ -74,7 +74,6 @@ public class ParkAuto extends OpMode {
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
-    public static int towerPositionTolerance = 20;
     //ARM
     private PIDController armController;
 
@@ -84,7 +83,6 @@ public class ParkAuto extends OpMode {
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
-    public static int armPositionTolerance = 20;
 
     private double targetX=0;
     private double targetY=0;
@@ -220,9 +218,9 @@ public class ParkAuto extends OpMode {
 
 
         startPose = new Pose2d(0, 0, Math.toRadians(0));
-        leftParkPose = new Pose2d( 27, 24);
+        leftParkPose = new Pose2d( 27, 28);
         middleParkPose = new Pose2d (27, 0);
-        rightParkPose = new Pose2d (27, -24);
+        rightParkPose = new Pose2d (27, -28);
         middlePark = drive.trajectoryBuilder(startPose)
                 .lineToLinearHeading(middleParkPose)
                 .addDisplacementMarker(() -> {
@@ -378,12 +376,9 @@ public class ParkAuto extends OpMode {
             targetY = 542.75598018;
             state+=1;
         }
-        if (state==1){
-            if (Math.abs(armController.getPositionError())<=armPositionTolerance && Math.abs(twController.getPositionError())<=towerPositionTolerance){
+        else if (state==1){
+            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
                 state+=1;
-            }
-            else{
-                telemetry.addLine("im not within tolerance yet");
             }
         }
         else if (state==2){
@@ -405,20 +400,18 @@ public class ParkAuto extends OpMode {
         }
         else if (state==6){
             targetX=388.43871245;
-            targetY=-340.67571868;
+            targetY=-320.67571868;
             state+=1;
         }
         else if (state==7){
-            if (Math.abs(armController.getPositionError())<=armPositionTolerance && Math.abs(twController.getPositionError())<=towerPositionTolerance){
+            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
                 state+=1;
-            }
-            else{
-                telemetry.addLine("im not within tolerance yet");
             }
         }
         else if  (state==8){
             done=true;
         }
+
         telemetry.addData("currentFSMState", state);
         drive.update();
 
@@ -484,5 +477,18 @@ public class ParkAuto extends OpMode {
 
 
         telemetry.update();
+    }
+    public Boolean withinTolerance(double armError, double towerError){
+        int armTolerance=20;
+        int towerTolerance=20;
+        if (Math.abs(armError)<=armTolerance && Math.abs(towerError)<=towerTolerance){
+            return true;
+        }
+        else{
+            telemetry.addLine("im not within tolerance yet");
+            return false;
+        }
+
+
     }
 }
