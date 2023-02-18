@@ -35,7 +35,7 @@ public class TeleOp2023V3Auto extends OpMode {
     //TW
     private PIDController twController;
     public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.27;
+    public static double Tf = 0;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -62,7 +62,7 @@ public class TeleOp2023V3Auto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.8;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -313,11 +313,13 @@ public class TeleOp2023V3Auto extends OpMode {
         telemetry.addData("armPos", armPos);
         telemetry.addData("armTarget", armTarget);
         telemetry.addData("armPower", armPower);
-
         //uncomment for tower tuning
         telemetry.addData("twPos", towerPos);
         telemetry.addData("towerTarget", twTarget);
         telemetry.addData("towerPower", towerPower);
+
+        telemetry.addData("TargetX", targetX);
+        telemetry.addData("TargetY", targetY);
 
         telemetry.update();
 

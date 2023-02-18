@@ -45,6 +45,8 @@ public class TeleOp2023V3 extends OpMode {
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
 
+    public static double towerMaxPower = 1;
+
     //ARM
     private PIDController armController;
 
@@ -54,6 +56,8 @@ public class TeleOp2023V3 extends OpMode {
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1;
 
     private double targetX=0;
     private double targetY=0;
@@ -65,7 +69,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.7;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -181,7 +185,7 @@ public class TeleOp2023V3 extends OpMode {
 
             //set servos
             gripperRotationServo.setPosition(gripperRotationServoPosition);
-            alignmentBarServo.setPosition(0.5);
+            alignmentBarServo.setPosition(0.4);
             telemetry.addData("armTarget", armTarget);
             telemetry.addData("armPos", armPos);
             telemetry.addData("towerTarget", twTarget);
@@ -193,6 +197,9 @@ public class TeleOp2023V3 extends OpMode {
 
     public void start() {
         gripperRotationServoPosition=0.35;
+        alignmentBarServo.setPosition(alignmentBarUpPos);
+        targetX=-214.93099;
+        targetY=735.98348;
     }
 
 
@@ -212,8 +219,8 @@ public class TeleOp2023V3 extends OpMode {
 
         //intakePosition
         if (gamepad2.right_bumper){
-            targetX=414.6;
-            targetY=-140.9;
+            targetX=493.6;
+            targetY=-169.86;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //groundJunction
@@ -237,9 +244,14 @@ public class TeleOp2023V3 extends OpMode {
         }
         //highJunction
         if (gamepad2.dpad_up){
-            targetX=15;
+            targetX=-15;
             targetY=722.4;
             alignmentBarServo.setPosition(alignmentBarUpPos);
+        }
+        //highCycle
+        if (gamepad2.left_bumper){
+            targetX=-95.96;
+            targetY=714.6;
         }
 
         targetX+=(gamepad2.left_stick_x)*4;
@@ -248,7 +260,7 @@ public class TeleOp2023V3 extends OpMode {
         if (gamepad2.a){
             frontRollerServo.setPower(1);
             backRollerServo.setPower(1);
-            alignmentBarServo.setPosition(0.5);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         else{
@@ -297,7 +309,12 @@ public class TeleOp2023V3 extends OpMode {
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
-
+        if (towerPid>towerMaxPower){
+            towerPid=towerMaxPower;
+        }
+        if (towerPid<-towerMaxPower){
+            towerPid=-towerMaxPower;
+        }
         double towerPower = towerPid + towerFf;
         towerRight.setPower(towerPower);
         towerLeft.setPower(towerPower);
@@ -307,9 +324,17 @@ public class TeleOp2023V3 extends OpMode {
 
         double armPid = armController.calculate(armPos, armTarget);
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        if (armPid>armMaxPower){
+            armPid=armMaxPower;
+        }
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
 
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);
+
+
 
 
         //uncomment for arm tuning
@@ -321,6 +346,8 @@ public class TeleOp2023V3 extends OpMode {
         telemetry.addData("twPos", towerPos);
         telemetry.addData("towerTarget", twTarget);
         telemetry.addData("towerPower", towerPower);
+        telemetry.addData("TargetX", targetX);
+        telemetry.addData("TargetY", targetY);
 
         telemetry.update();
 
