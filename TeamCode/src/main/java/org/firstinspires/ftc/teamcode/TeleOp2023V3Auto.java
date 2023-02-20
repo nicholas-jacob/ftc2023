@@ -182,7 +182,7 @@ public class TeleOp2023V3Auto extends OpMode {
 
             //set servos
             gripperRotationServo.setPosition(gripperRotationServoPosition);
-            alignmentBarServo.setPosition(0.5);
+            alignmentBarServo.setPosition(0.4);
             telemetry.addData("armTarget", armTarget);
             telemetry.addData("armPos", armPos);
             telemetry.addData("towerTarget", twTarget);
