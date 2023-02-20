@@ -134,9 +134,17 @@ public class ParkAuto extends OpMode {
     Pose2d leftParkPose=null;
     Pose2d middleParkPose=null;
     Pose2d rightParkPose=null;
+    Pose2d forwardPositionPose=null;
+    Pose2d leftPositionPose = null;
+    Pose2d cyclePositionPose=null;
     Trajectory middlePark=null;
     Trajectory leftPark=null;
     Trajectory rightPark=null;
+    Trajectory forwardPosition = null;
+    Trajectory leftPosition = null;
+    Trajectory cyclePosition=null;
+
+
 
     ElapsedTime timer = null;
 
@@ -217,11 +225,34 @@ public class ParkAuto extends OpMode {
         drive = new SampleMecanumDrive(hardwareMap);
 
 
-        startPose = new Pose2d(0, 0, Math.toRadians(0));
+        startPose = new Pose2d(0, 0, Math.toRadians(90));
         leftParkPose = new Pose2d( 27, 28);
         middleParkPose = new Pose2d (27, 0);
         rightParkPose = new Pose2d (27, -28);
-        middlePark = drive.trajectoryBuilder(startPose)
+        forwardPositionPose = new Pose2d (63, 0);
+        leftPositionPose = new Pose2d (63, 12);
+        cyclePositionPose = new Pose2d (66, 12, Math.toRadians(104.0362));
+
+
+        forwardPosition = drive.trajectoryBuilder(startPose)
+                .lineToLinearHeading(forwardPositionPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        leftPosition = drive.trajectoryBuilder(forwardPosition.end())
+                .lineToLinearHeading(leftPositionPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        cyclePosition = drive.trajectoryBuilder(leftPosition.end())
+                .lineToLinearHeading(cyclePositionPose)
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        middlePark = drive.trajectoryBuilder(cyclePosition.end())
                 .lineToLinearHeading(middleParkPose)
                 .addDisplacementMarker(() -> {
                     state+=1;
