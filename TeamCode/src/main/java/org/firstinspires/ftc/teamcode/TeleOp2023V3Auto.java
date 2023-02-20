@@ -42,6 +42,8 @@ public class TeleOp2023V3Auto extends OpMode {
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
 
+    public static double towerMaxPower = 1;
+
     //ARM
     private PIDController armController;
 
@@ -51,6 +53,8 @@ public class TeleOp2023V3Auto extends OpMode {
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1;
 
     private double targetX=0;
     private double targetY=0;
@@ -62,7 +66,7 @@ public class TeleOp2023V3Auto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.8;
+    private final double alignmentBarUpPos = 0.65;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -102,8 +106,8 @@ public class TeleOp2023V3Auto extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
 
 
@@ -113,7 +117,7 @@ public class TeleOp2023V3Auto extends OpMode {
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -190,6 +194,9 @@ public class TeleOp2023V3Auto extends OpMode {
 
     public void start() {
         gripperRotationServoPosition=0.35;
+        alignmentBarServo.setPosition(alignmentBarUpPos);
+        targetX=0;
+        targetY=545;
     }
 
 
@@ -197,7 +204,6 @@ public class TeleOp2023V3Auto extends OpMode {
     public void loop() {
 
         //dt code
-        System.out.println(gamepad1.left_stick_x);
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         // finite state machine goes here
@@ -209,8 +215,8 @@ public class TeleOp2023V3Auto extends OpMode {
 
         //intakePosition
         if (gamepad2.right_bumper){
-            targetX=414.6;
-            targetY=-140.9;
+            targetX=463.6;
+            targetY=-169.86;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //groundJunction
@@ -234,18 +240,23 @@ public class TeleOp2023V3Auto extends OpMode {
         }
         //highJunction
         if (gamepad2.dpad_up){
-            targetX=15;
+            targetX=-15;
             targetY=722.4;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
+        //highCycle
+        if (gamepad2.left_bumper){
+            targetX=-95.96;
+            targetY=714.6;
+        }
 
-        targetX+=(gamepad2.left_stick_x)*4;
-        targetY-=(gamepad2.left_stick_y)*4;
+        targetX+=(gamepad2.left_stick_x)*7;
+        targetY-=(gamepad2.left_stick_y)*7;
 
         if (gamepad2.a){
             frontRollerServo.setPower(1);
             backRollerServo.setPower(1);
-            alignmentBarServo.setPosition(0.5);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         else{
@@ -294,7 +305,12 @@ public class TeleOp2023V3Auto extends OpMode {
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
-
+        if (towerPid>towerMaxPower){
+            towerPid=towerMaxPower;
+        }
+        if (towerPid<-towerMaxPower){
+            towerPid=-towerMaxPower;
+        }
         double towerPower = towerPid + towerFf;
         towerRight.setPower(towerPower);
         towerLeft.setPower(towerPower);
@@ -304,6 +320,12 @@ public class TeleOp2023V3Auto extends OpMode {
 
         double armPid = armController.calculate(armPos, armTarget);
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        if (armPid>armMaxPower){
+            armPid=armMaxPower;
+        }
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
 
         double armPower = armPid + armFf;
         armMotor.setPower(armPower);

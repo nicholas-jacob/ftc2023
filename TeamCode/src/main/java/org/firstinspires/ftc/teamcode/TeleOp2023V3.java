@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -69,7 +68,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.7;
+    private final double alignmentBarUpPos = 0.65;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -109,8 +108,8 @@ public class TeleOp2023V3 extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
 
 
@@ -120,7 +119,7 @@ public class TeleOp2023V3 extends OpMode {
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -198,8 +197,8 @@ public class TeleOp2023V3 extends OpMode {
     public void start() {
         gripperRotationServoPosition=0.35;
         alignmentBarServo.setPosition(alignmentBarUpPos);
-        targetX=-214.93099;
-        targetY=735.98348;
+        targetX=0;
+        targetY=545;
     }
 
 
@@ -207,7 +206,6 @@ public class TeleOp2023V3 extends OpMode {
     public void loop() {
 
         //dt code
-        System.out.println(gamepad1.left_stick_x);
         mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         // finite state machine goes here
@@ -254,8 +252,8 @@ public class TeleOp2023V3 extends OpMode {
             targetY=714.6;
         }
 
-        targetX+=(gamepad2.left_stick_x)*4;
-        targetY-=(gamepad2.left_stick_y)*4;
+        targetX+=(gamepad2.left_stick_x)*7;
+        targetY-=(gamepad2.left_stick_y)*7;
 
         if (gamepad2.a){
             frontRollerServo.setPower(1);
@@ -346,6 +344,7 @@ public class TeleOp2023V3 extends OpMode {
         telemetry.addData("twPos", towerPos);
         telemetry.addData("towerTarget", twTarget);
         telemetry.addData("towerPower", towerPower);
+
         telemetry.addData("TargetX", targetX);
         telemetry.addData("TargetY", targetY);
 
