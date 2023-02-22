@@ -515,7 +515,7 @@ public class leftAuto extends OpMode {
             }
         }
         else if  (state==6){
-            done=true;
+
         }
 
 
