@@ -19,7 +19,10 @@ public class MeepMeepTesting {
                                         .splineTo(new Vector2d(-31,-36), Math.toRadians(90))
                                         .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
                                         .splineToConstantHeading(new Vector2d(-56, -8), Math.toRadians(90+14.0362))
-//
+                                        .lineToSplineHeading(new Pose2d(-60, -24, Math.toRadians(90)))
+                                        .lineToLinearHeading(new Pose2d(-60, -36))
+//                                        .splineToSplineHeading(new Pose2d(-36, -36, Math.toRadians(270)), Math.toRadians(0) )
+                                        .splineToSplineHeading(new Pose2d(-12, -36, Math.toRadians(270)), Math.toRadians(0) )
 //set up two inches away from the wall
                                 .build()
 
