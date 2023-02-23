@@ -15,14 +15,12 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(24, 20, Math.toRadians(160), Math.toRadians(140), 15.8)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d((-(24 + (17.375/2))), -63.3125, Math.toRadians(180)))
-                                .lineToSplineHeading((new Pose2d(-36, -24, Math.toRadians(90))))
-                                .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
-                                .splineToConstantHeading(new Vector2d(-56, -8), Math.toRadians(90+14.0362))
-//                                .lineToLinearHeading(new Pose2d(-36, -36, Math.toRadians(90)))
-//                                .splineToLinearHeading(new Pose2d(-56, -8, Math.toRadians(194.0362)), Math.toRadians(225))
-////                                .splineTo(new Vector2d(-56, -11), Math.toRadians(194.0362))
-////                                .lineTo(new Vector2d(-56, -8))
+                                drive.trajectorySequenceBuilder(new Pose2d(-38.465, -61.8125, Math.toRadians(90)))
+                                        .splineTo(new Vector2d(-31,-36), Math.toRadians(90))
+                                        .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
+                                        .splineToConstantHeading(new Vector2d(-56, -8), Math.toRadians(90+14.0362))
+//
+//set up two inches away from the wall
                                 .build()
 
                 );
