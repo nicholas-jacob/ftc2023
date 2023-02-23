@@ -156,15 +156,12 @@ public class leftAuto extends OpMode {
 
 
     Pose2d startPose=null;
-    Pose2d leftParkPose=null;
-    Pose2d middleParkPose=null;
-    Pose2d rightParkPose=null;
-    Pose2d step1Pose=null;
-    Pose2d step2Pose=null;
+    Vector2d cycle_positionVector=null;
     Trajectory middlePark=null;
     Trajectory leftPark=null;
     Trajectory rightPark=null;
     Trajectory cycle_position=null;
+    Trajectory transition=null;
 
 
 
@@ -273,37 +270,39 @@ public class leftAuto extends OpMode {
 
 
 
-        startPose = new Pose2d(0, 0, Math.toRadians(90));
-        leftParkPose = new Pose2d( 27, 28);
-        middleParkPose = new Pose2d (27, 0);
-        rightParkPose = new Pose2d (27, -28);
-        step1Pose = new Pose2d (48, 0, Math.toRadians(90));
-        step2Pose = new Pose2d (64, 20, Math.toRadians(104.0362));
-
+        startPose = new Pose2d(-38.465, -61.8125, Math.toRadians(90));
+        cycle_positionVector = new Vector2d(-56, -8);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
-                .splineToSplineHeading(step1Pose, Math.toRadians(0))
-                .splineToSplineHeading(step2Pose, Math.toRadians(14.0362 - 90))
+                .splineTo(new Vector2d(-31,-36), Math.toRadians(90))
+                .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
+                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        middlePark = drive.trajectoryBuilder(cycle_position.end())
-                .lineToLinearHeading(middleParkPose)
+        transition = drive.trajectoryBuilder(cycle_position.end())
+                .lineToSplineHeading(new Pose2d(-59, -24, Math.toRadians(180 - 14.0362)))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        leftPark = drive.trajectoryBuilder(middlePark.end())
-                .lineToLinearHeading(leftParkPose)
+        leftPark = drive.trajectoryBuilder(transition.end())
+                .lineToSplineHeading(new Pose2d(-60, -34, Math.toRadians(270)))
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        middlePark = drive.trajectoryBuilder(leftPark.end())
+                .lineToSplineHeading(new Pose2d(-36, -34, Math.toRadians(270)) )
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
         rightPark = drive.trajectoryBuilder(middlePark.end())
-                .lineToLinearHeading(rightParkPose)
+                .lineToSplineHeading(new Pose2d(-12, -34, Math.toRadians(270)) )
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
@@ -486,37 +485,39 @@ public class leftAuto extends OpMode {
             drive.followTrajectoryAsync(cycle_position);
             state+=1;
         }
-//        else if (state==2){
-//            drive.followTrajectoryAsync(middlePark);
-//            state+=1;
-//        }
-//        else if (state==4){
-//            if (signal == left) {
-//                drive.followTrajectoryAsync(leftPark);
-//            }
-//            else if (signal == right) {
-//                drive.followTrajectoryAsync(rightPark);
-//
-//
-//            }
-//            else{
-//                state+=1;
-//            }
-//            state+=1;
-//        }
-       else if (state==4){
+        else if (state==4){
+            drive.followTrajectoryAsync(transition);
+            state+=1;
+        }
+        else if (state==6){
+            drive.followTrajectoryAsync(leftPark);
+            state+=1;
+        }
+        else if (state==8){
+            if (signal == middle) {
+                drive.followTrajectoryAsync(middlePark);
+            }
+            else if (signal == right) {
+                drive.followTrajectoryAsync(rightPark);
+
+
+            }
+            else{
+                state+=1;
+            }
+            state+=1;
+        }
+       else if (state==10){
             targetX=388.43871245;
             targetY=-320.67571868;
             state+=1;
         }
-        else if (state==5){
+        else if (state==11){
             if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
                 state+=1;
             }
         }
-        else if  (state==6){
 
-        }
 
 
         telemetry.addData("currentFSMState", state);
