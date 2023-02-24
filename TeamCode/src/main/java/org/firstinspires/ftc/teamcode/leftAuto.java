@@ -83,8 +83,8 @@ public class leftAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.035, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.06;
+    public static double Tp=0.03, Ti = 0, Td = 0.0014;
+    public static double Tf = 0;//0.27;
 
 
 
@@ -97,7 +97,7 @@ public class leftAuto extends OpMode {
     private PIDController armController;
 
 
-    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
+    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
     public static double Af = 0.13;
 
     public static int armTarget = 0;
@@ -669,7 +669,6 @@ public class leftAuto extends OpMode {
                 }
                 if (timer.milliseconds() >= 1700) {
                     depositing = false;
-                    state=0;
                 }
             }
 
@@ -695,11 +694,11 @@ public class leftAuto extends OpMode {
                     targetY = -48;
                     frontRollerServo.setPower(0.1);
                     backRollerServo.setPower(0.1);
-                    state+=1;
+                    state += 1;
                 }
+            } else if(state == 3){
                 if (timer.milliseconds() >= 1300) {
                     collecting = false;
-                    state=0;
                 }
             }
 
@@ -708,6 +707,14 @@ public class leftAuto extends OpMode {
 
         telemetry.addData("currentFSMState", state);
         telemetry.addData("phase", phase);
+        telemetry.addData("depositing?", depositing);
+        telemetry.addData("collecting", collecting);
+        telemetry.addData("targetX", targetX);
+        telemetry.addData("targetY", targetY);
+        telemetry.addData("armTarget", armTarget);
+        telemetry.addData("armError", armController.getVelocityError());
+        telemetry.addData("towerTarget", twTarget);
+        telemetry.addData("towerError", twController.getPositionError());
         drive.update();
 
 
