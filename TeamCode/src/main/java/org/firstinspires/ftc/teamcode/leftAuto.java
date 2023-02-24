@@ -60,6 +60,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 
 
@@ -70,6 +71,8 @@ public class leftAuto extends OpMode {
 
 
     boolean done=false;
+    String phase="toCycle";
+    boolean depositing=false;
     int state=0;
 
 
@@ -109,7 +112,7 @@ public class leftAuto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.65;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -168,7 +171,7 @@ public class leftAuto extends OpMode {
 
 
 
-    ElapsedTime timer = null;
+    ElapsedTime timer = new ElapsedTime();
 
 
 
@@ -199,15 +202,15 @@ public class leftAuto extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         //setUp arm
         armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
@@ -363,11 +366,7 @@ public class leftAuto extends OpMode {
 
         //set servos
         gripperRotationServo.setPosition(gripperRotationServoPosition);
-        alignmentBarServo.setPosition(0.5);
-        telemetry.addData("armTarget", armTarget);
-        telemetry.addData("armPos", armPos);
-        telemetry.addData("towerTarget", twTarget);
-        telemetry.addData("towerPos", towerPos);
+        alignmentBarServo.setPosition(0.35);
 
 
         telemetry.update();
@@ -392,29 +391,6 @@ public class leftAuto extends OpMode {
                     break;
                 }
             }
-
-
-            if (tagFound) {
-                telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                //tagToTelemetry(tagOfInterest);
-            } else {
-                telemetry.addLine("Don't see tag of interest :(");
-
-
-                if (tagOfInterest == null) {
-                    telemetry.addLine("(The tag has never been seen)");
-                } else {
-                    telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                    //tagToTelemetry(tagOfInterest);
-                }
-            }
-
-
-            telemetry.addLine("Don't see tag of interest :(");
-
-
-
-
 
 
         }
@@ -447,7 +423,9 @@ public class leftAuto extends OpMode {
     public void start() {
         /* Update the telemetry */
         gripperRotationServoPosition=0.35;
-
+        alignmentBarServo.setPosition(alignmentBarUpPos);
+        frontRollerServo.setPower(0.1);
+        backRollerServo.setPower(0.1);
 
         //set final parking zone from the camera
         if (tagOfInterest != null) {
@@ -471,56 +449,98 @@ public class leftAuto extends OpMode {
 
 
     public void loop(){
-        if (state==0) {
-            targetX = 0;
-            targetY = 542.75598018;
-            state+=1;
-        }
-        else if (state==1){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+        if (Objects.equals(phase, "toCycle")){
+            if (state==0) {
+                targetX = 0;
+                targetY = 542.75598018;
                 state+=1;
             }
-        }
-        else if (state==2){
-            drive.followTrajectoryAsync(cycle_position);
-            state+=1;
-        }
-        else if (state==4){
-            drive.followTrajectoryAsync(transition);
-            state+=1;
-        }
-        else if (state==6){
-            drive.followTrajectoryAsync(leftPark);
-            state+=1;
-        }
-        else if (state==8){
-            if (signal == middle) {
-                drive.followTrajectoryAsync(middlePark);
+            else if (state==1){
+                if (withinTolerance(armController.getPositionError(),100, twController.getPositionError(), 20)){
+                    state+=1;
+                }
             }
-            else if (signal == right) {
-                drive.followTrajectoryAsync(rightPark);
+            else if (state==2){
+                drive.followTrajectoryAsync(cycle_position);
+                state+=1;
+            }
+            else if (state==4){
+                phase="deposit1";
+                state=0;
+            }
+        }
+        else if (Objects.equals(phase, "deposit1")){
+            if (state!=0 && depositing==false){
+                phase = "finish";
+                state=0;
+            }
+            else {
+                depositing=true;
+            }
+        }
+        else if (Objects.equals(phase, "finish")){
+            if (state==0){
+                targetX=388.43871245;
+                targetY=-320.67571868;
+                state+=1;
+            }
+            else if (state==1){
+                if (withinTolerance(armController.getPositionError(),100, twController.getPositionError(), 20)){
+                state+=1;
+                }
+            }
+            else if (state==2){
+                done = true;
+            }
+        }
 
 
-            }
-            else{
+        if (depositing==true){ //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
+            if (state==0){ //to above junction
+                targetX=0; //placeholder
+                targetY=600; //placeholder
                 state+=1;
             }
-            state+=1;
-        }
-       else if (state==10){
-            targetX=388.43871245;
-            targetY=-320.67571868;
-            state+=1;
-        }
-        else if (state==11){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+            else if (state==1){
+                if (withinTolerance(armController.getPositionError(),25, twController.getPositionError(), 5)){
+                    state+=1;
+                }
+            }
+            else if (state==2){ //deploy alignment bar
+                alignmentBarServo.setPosition(alignmentBarDownPos);
+                timer.reset();
                 state+=1;
             }
+            else if (state==3){ //alignment
+                if (timer.milliseconds()>=400){//deposit cone
+                    frontRollerServo.setPower(-1);
+                    backRollerServo.setPower(-1);
+                    state+=1;
+                }
+            }
+            else if (state==4){
+                if (timer.milliseconds()>=1000){
+                    alignmentBarServo.setPosition(alignmentBarUpPos);
+                    frontRollerServo.setPower(0.1);
+                    backRollerServo.setPower(0.1);
+                    targetX=0; //placeholder (position slightly up and slightly closer
+                    targetY=700;
+
+                }
+                if (timer.milliseconds()>=1200){
+                    depositing=false;
+                }
+            }
+
         }
+
+
+
 
 
 
         telemetry.addData("currentFSMState", state);
+        telemetry.addData("phase", phase);
         drive.update();
 
 
@@ -560,6 +580,9 @@ public class leftAuto extends OpMode {
         else{
             towerRight.setPower(0);
             towerLeft.setPower(0);
+            //deal with servos once done
+            alignmentBarServo.setPosition(alignmentBarUpPos);
+            gripperRotationServoPosition=1;
         }
 
 
@@ -593,19 +616,9 @@ public class leftAuto extends OpMode {
         gripperRotationServo.setPosition(gripperRotationServoPosition);
 
 
-
-
-
-
-
-
-
-
         telemetry.update();
     }
-    public Boolean withinTolerance(double armError, double towerError){
-        int armTolerance=20;
-        int towerTolerance=20;
+    public Boolean withinTolerance(double armError, int armTolerance, double towerError, int towerTolerance){ //arm position checking function to allow only moving on if it is in pos
         if (Math.abs(armError)<=armTolerance && Math.abs(towerError)<=towerTolerance){
             return true;
         }

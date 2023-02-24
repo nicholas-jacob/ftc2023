@@ -94,7 +94,7 @@ public class ParkAuto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.65;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -163,14 +163,14 @@ public class ParkAuto extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         //setUp arm
         armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -283,11 +283,7 @@ public class ParkAuto extends OpMode {
 
         //set servos
         gripperRotationServo.setPosition(gripperRotationServoPosition);
-        alignmentBarServo.setPosition(0.5);
-        telemetry.addData("armTarget", armTarget);
-        telemetry.addData("armPos", armPos);
-        telemetry.addData("towerTarget", twTarget);
-        telemetry.addData("towerPos", towerPos);
+        alignmentBarServo.setPosition(0.35);
 
         telemetry.update();
 
@@ -306,22 +302,6 @@ public class ParkAuto extends OpMode {
                     break;
                 }
             }
-
-            if (tagFound) {
-                telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                //tagToTelemetry(tagOfInterest);
-            } else {
-                telemetry.addLine("Don't see tag of interest :(");
-
-                if (tagOfInterest == null) {
-                    telemetry.addLine("(The tag has never been seen)");
-                } else {
-                    telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                    //tagToTelemetry(tagOfInterest);
-                }
-            }
-
-            telemetry.addLine("Don't see tag of interest :(");
 
 
 
@@ -353,6 +333,9 @@ public class ParkAuto extends OpMode {
     public void start() {
         /* Update the telemetry */
         gripperRotationServoPosition=0.35;
+        alignmentBarServo.setPosition(alignmentBarUpPos);
+        frontRollerServo.setPower(0.1);
+        backRollerServo.setPower(0.1);
 
         //set final parking zone from the camera
         if (tagOfInterest != null) {
@@ -377,7 +360,7 @@ public class ParkAuto extends OpMode {
             state+=1;
         }
         else if (state==1){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+            if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)){
                 state+=1;
             }
         }
@@ -404,7 +387,7 @@ public class ParkAuto extends OpMode {
             state+=1;
         }
         else if (state==7){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+            if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)){
                 state+=1;
             }
         }
@@ -478,9 +461,7 @@ public class ParkAuto extends OpMode {
 
         telemetry.update();
     }
-    public Boolean withinTolerance(double armError, double towerError){
-        int armTolerance=20;
-        int towerTolerance=20;
+    public Boolean withinTolerance(double armError, int armTolerance, double towerError, int towerTolerance){
         if (Math.abs(armError)<=armTolerance && Math.abs(towerError)<=towerTolerance){
             return true;
         }
