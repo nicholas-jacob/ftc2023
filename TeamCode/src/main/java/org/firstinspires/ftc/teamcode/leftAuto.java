@@ -287,7 +287,7 @@ public class leftAuto extends OpMode {
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(-31,-36), Math.toRadians(90))
+                .splineTo(new Vector2d(-30,-36), Math.toRadians(90))
                 .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
@@ -501,12 +501,12 @@ public class leftAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect2")){ //collect cone #2
             if (state != 0 && collecting == false) {
-                phase = "deposit 2";
+                phase = "deposit2";
                 state = 0;
             } else {
                 collecting = true;
                 collectX=485;
-                collectY=-113;
+                collectY=-143;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -517,7 +517,7 @@ public class leftAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect3")){ //collect cone #3
             if (state != 0 && collecting == false) {
-                phase = "deposit 3";
+                phase = "deposit3";
                 state = 0;
             } else {
                 collecting = true;
@@ -533,7 +533,7 @@ public class leftAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect4")){ //collect cone #4
             if (state != 0 && collecting == false) {
-                phase = "deposit 4";
+                phase = "deposit4";
                 state = 0;
             } else {
                 collecting = true;
@@ -549,7 +549,7 @@ public class leftAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect5")){ //collect cone #5
             if (state != 0 && collecting == false) {
-                phase = "deposit 5";
+                phase = "deposit5";
                 state = 0;
             } else {
                 collecting = true;
@@ -565,7 +565,7 @@ public class leftAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect6")){ //collect cone #6
             if (state != 0 && collecting == false) {
-                phase = "deposit 6";
+                phase = "deposit6";
                 state = 0;
             } else {
                 collecting = true;
@@ -642,7 +642,7 @@ public class leftAuto extends OpMode {
                 targetY = 848;
                 state += 1;
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 20)) {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     timer.reset();
@@ -682,7 +682,7 @@ public class leftAuto extends OpMode {
                 state += 1;
                 alignmentBarServo.setPosition(alignmentBarUpPos);
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 20)) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
