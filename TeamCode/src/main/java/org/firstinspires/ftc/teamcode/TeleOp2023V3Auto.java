@@ -34,8 +34,9 @@ public class TeleOp2023V3Auto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0;//0.27;
+    public static double Tp=0.035, Ti = 0, Td = 0.0014;
+    public static double Tf = 0.06;
+
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -47,7 +48,7 @@ public class TeleOp2023V3Auto extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
     public static double Af = 0.13;
 
     public static int armTarget = 0;
@@ -215,8 +216,8 @@ public class TeleOp2023V3Auto extends OpMode {
 
         //intakePosition
         if (gamepad2.right_bumper){
-            targetX=463.6;
-            targetY=-169.86;
+            targetX=480;
+            targetY=-202;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //groundJunction
@@ -227,14 +228,14 @@ public class TeleOp2023V3Auto extends OpMode {
         }
         //lowJunction
         if (gamepad2.dpad_left){
-            targetX=-483.1;
-            targetY=773.17;
+            targetX=-438;
+            targetY=246;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //midJunction
         if (gamepad2.dpad_right){
-            targetX=447.9;
-            targetY=-248.1;
+            targetX=547;
+            targetY=-358;
             alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
@@ -246,8 +247,8 @@ public class TeleOp2023V3Auto extends OpMode {
         }
         //highCycle
         if (gamepad2.left_bumper){
-            targetX=-95.96;
-            targetY=714.6;
+            targetX=-137;
+            targetY=735;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;

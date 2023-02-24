@@ -67,20 +67,23 @@ public class ParkAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.27;
+    public static double Tp=0.035, Ti = 0, Td = 0.0014;
+    public static double Tf = 0.06;
 
     public static int twTarget = 0;
+    public static double towerMaxPower = 1;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
     public static double Af = 0.13;
 
+
     public static int armTarget = 0;
+    public static double armMaxPower = 1;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
@@ -419,6 +422,12 @@ public class ParkAuto extends OpMode {
         //tower controller
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
+        if (towerPid>towerMaxPower){
+            towerPid=towerMaxPower;
+        }
+        if (towerPid<-towerMaxPower){
+            towerPid=-towerMaxPower;
+        }
         double towerFf = Tf;
 
         double towerPower = towerPid + towerFf;
@@ -436,6 +445,12 @@ public class ParkAuto extends OpMode {
         armController.setPID(Ap, Ai, Ad);
 
         double armPid = armController.calculate(armPos, armTarget);
+        if (armPid>armMaxPower){
+            armPid=armMaxPower;
+        }
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
 
         double armPower = armPid + armFf;

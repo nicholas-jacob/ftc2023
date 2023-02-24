@@ -36,8 +36,8 @@ public class TeleOp2023V3 extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0;//0.27;
+    public static double Tp=0.035, Ti = 0, Td = 0.0014;
+    public static double Tf = 0.06;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -49,7 +49,7 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
     public static double Af = 0.13;
 
     public static int armTarget = 0;
@@ -217,39 +217,41 @@ public class TeleOp2023V3 extends OpMode {
 
         //intakePosition
         if (gamepad2.right_bumper){
-            targetX=493.6;
-            targetY=-169.86;
+            targetX=480;
+            targetY=-202;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //groundJunction
         if (gamepad2.dpad_down){
-            targetX=-133.9373;
-            targetY=-157.6818;
+            targetX=-359;
+            targetY=-17;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //lowJunction
         if (gamepad2.dpad_left){
+            //targetX=-438;
+            //targetY=246;
             targetX=-483.1;
-            targetY=773.17;
+            targetY=773.17; //temp numbers for tuning
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //midJunction
         if (gamepad2.dpad_right){
-            targetX=447.9;
-            targetY=-248.1;
+            targetX=547;
+            targetY=-358;
             alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         //highJunction
         if (gamepad2.dpad_up){
-            targetX=-15;
-            targetY=722.4;
+            targetX=81;
+            targetY=663;
             alignmentBarServo.setPosition(alignmentBarUpPos);
         }
         //highCycle
         if (gamepad2.left_bumper){
-            targetX=-95.96;
-            targetY=714.6;
+            targetX=-137;
+            targetY=735;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;

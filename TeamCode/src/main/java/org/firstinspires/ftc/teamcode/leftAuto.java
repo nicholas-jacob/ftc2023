@@ -80,11 +80,13 @@ public class leftAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.27;
+    public static double Tp=0.035, Ti = 0, Td = 0.0014;
+    public static double Tf = 0.06;
+
 
 
     public static int twTarget = 0;
+    public static double towerMaxPower = 1;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
@@ -92,11 +94,11 @@ public class leftAuto extends OpMode {
     private PIDController armController;
 
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
     public static double Af = 0.13;
 
-
     public static int armTarget = 0;
+    public static double armMaxPower = 1;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
@@ -310,7 +312,7 @@ public class leftAuto extends OpMode {
                     state+=1;
                 })
                 .build();
-        drive.setPoseEstimate(startPose);
+
 
 
 
@@ -436,6 +438,7 @@ public class leftAuto extends OpMode {
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
+        drive.setPoseEstimate(startPose);
 
 
 
@@ -448,95 +451,109 @@ public class leftAuto extends OpMode {
 
 
 
-    public void loop(){
-        if (Objects.equals(phase, "toCycle")){
-            if (state==0) {
+    public void loop() {
+        if (Objects.equals(phase, "toCycle")) {
+            if (state == 0) {
                 targetX = 0;
                 targetY = 542.75598018;
-                state+=1;
+                state += 1;
+            } else if (state == 1) {
+                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
+                    state += 1;
+                }
+            } else if (state == 2) {
+                drive.followTrajectoryAsync(cycle_position);
+                state += 1;
+            } else if (state == 4) {
+                phase = "deposit1";
+                state = 0;
             }
-            else if (state==1){
-                if (withinTolerance(armController.getPositionError(),100, twController.getPositionError(), 20)){
+        } else if (Objects.equals(phase, "deposit1")) {
+            if (state != 0 && depositing == false) {
+                phase = "park";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "park")) {
+            if (state == 0) {
+                targetX = 0;
+                targetY = 542.75598018;
+                state += 1;
+            } else if (state == 1) {
+                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
+                    state += 1;
+                }
+            } else if (state == 2) {
+                drive.followTrajectoryAsync(transition);
+                state+=1;
+            } else if (state == 4) {
+                drive.followTrajectoryAsync(leftPark);
+                state+=1;
+            } else if (state == 6) {
+                if (signal==left){
+                    state+=2;
+                } else if (signal==middle){
+                    drive.followTrajectoryAsync(middlePark);
+                    state+=1;
+                } else if (signal==right){
+                    drive.followTrajectoryAsync(rightPark);
                     state+=1;
                 }
-            }
-            else if (state==2){
-                drive.followTrajectoryAsync(cycle_position);
-                state+=1;
-            }
-            else if (state==4){
-                phase="deposit1";
-                state=0;
-            }
-        }
-        else if (Objects.equals(phase, "deposit1")){
-            if (state!=0 && depositing==false){
+            } else if (state == 8) {
                 phase = "finish";
-                state=0;
+                state = 0;
             }
-            else {
-                depositing=true;
-            }
-        }
-        else if (Objects.equals(phase, "finish")){
-            if (state==0){
-                targetX=388.43871245;
-                targetY=-320.67571868;
-                state+=1;
-            }
-            else if (state==1){
-                if (withinTolerance(armController.getPositionError(),100, twController.getPositionError(), 20)){
-                state+=1;
+
+
+        } else if (Objects.equals(phase, "finish")) {
+            if (state == 0) {
+                targetX = 388.43871245;
+                targetY = -320.67571868;
+                state += 1;
+            } else if (state == 1) {
+                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
+                    state += 1;
                 }
-            }
-            else if (state==2){
+            } else if (state == 2) {
                 done = true;
             }
         }
 
 
-        if (depositing==true){ //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
-            if (state==0){ //to above junction
-                targetX=0; //placeholder
-                targetY=600; //placeholder
-                state+=1;
-            }
-            else if (state==1){
-                if (withinTolerance(armController.getPositionError(),25, twController.getPositionError(), 5)){
-                    state+=1;
+        if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
+            if (state == 0) { //to above junction
+                targetX = -396;
+                targetY = 848;
+                state += 1;
+            } else if (state == 1) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                    state += 1;
                 }
-            }
-            else if (state==2){ //deploy alignment bar
+            } else if (state == 2) { //deploy alignment bar
                 alignmentBarServo.setPosition(alignmentBarDownPos);
                 timer.reset();
-                state+=1;
-            }
-            else if (state==3){ //alignment
-                if (timer.milliseconds()>=400){//deposit cone
+                state += 1;
+            } else if (state == 3) { //alignment
+                if (timer.milliseconds() >= 1000) {//deposit cone
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
-                    state+=1;
+                    state += 1;
                 }
-            }
-            else if (state==4){
-                if (timer.milliseconds()>=1000){
+            } else if (state == 4) {
+                if (timer.milliseconds() >= 2000) {
                     alignmentBarServo.setPosition(alignmentBarUpPos);
                     frontRollerServo.setPower(0.1);
                     backRollerServo.setPower(0.1);
-                    targetX=0; //placeholder (position slightly up and slightly closer
-                    targetY=700;
-
+                    targetX = -398;
+                    targetY = 741;
                 }
-                if (timer.milliseconds()>=1200){
-                    depositing=false;
+                if (timer.milliseconds() >= 2500) {
+                    depositing = false;
                 }
             }
 
         }
-
-
-
-
 
 
         telemetry.addData("currentFSMState", state);
@@ -544,48 +561,46 @@ public class leftAuto extends OpMode {
         drive.update();
 
 
-
-
         //inverse kinemetics
         int towerPos = towerRight.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
-        double targetXLast=targetX;
-        double targetYLast=targetY;
+        double targetXLast = targetX;
+        double targetYLast = targetY;
 
 
         //calculate with inverse kinematics
-        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
-            armTarget=inverseKinematics.armTarget;
-            twTarget=inverseKinematics.towerTarget;
+        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)) {
+            armTarget = inverseKinematics.armTarget;
+            twTarget = inverseKinematics.towerTarget;
+        } else {
+            targetX = targetXLast;
+            targetY = targetYLast;
         }
-        else {
-            targetX=targetXLast;
-            targetY=targetYLast;
-        }
-
-
 
 
         //tower controller
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
+        if (towerPid > towerMaxPower) {
+            towerPid = towerMaxPower;
+        }
+        if (towerPid < -towerMaxPower) {
+            towerPid = -towerMaxPower;
+        }
         double towerFf = Tf;
 
 
         double towerPower = towerPid + towerFf;
-        if (!done){
+        if (!done) {
             towerRight.setPower(towerPower);
             towerLeft.setPower(towerPower);
-        }
-        else{
+        } else {
             towerRight.setPower(0);
             towerLeft.setPower(0);
             //deal with servos once done
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=1;
+            gripperRotationServoPosition = 1;
         }
-
-
 
 
         //arm controller
@@ -593,18 +608,21 @@ public class leftAuto extends OpMode {
 
 
         double armPid = armController.calculate(armPos, armTarget);
-        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        if (armPid > armMaxPower) {
+            armPid = armMaxPower;
+        }
+        if (armPid < -armMaxPower) {
+            armPid = -armMaxPower;
+        }
+        double armFf = -Math.sin((armPos / ticksPerRadian) - 0.236) * Af;
 
 
         double armPower = armPid + armFf;
-        if (!done){
+        if (!done) {
             armMotor.setPower(armPower);
-        }
-        else{
+        } else {
             armMotor.setPower(0);
         }
-
-
 
 
         if (retractAlignmentBar > 0) {
