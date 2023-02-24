@@ -666,7 +666,9 @@ public class leftAuto extends OpMode {
                     backRollerServo.setPower(0);
                     targetX = -396;
                     targetY = 848;
+                    state += 1;
                 }
+            } else if (state ==5) {
                 if (timer.milliseconds() >= 1700) {
                     depositing = false;
                 }
