@@ -385,8 +385,10 @@ public class ParkAuto extends OpMode {
             state+=1;
         }
         else if (state==6){
-            targetX=388.43871245;
-            targetY=-320.67571868;
+            targetX=308.43871245;
+            targetY=-300.67571868;
+            gripperRotationServoPosition=1;
+            alignmentBarServo.setPosition(0.35);
             state+=1;
         }
         else if (state==7){

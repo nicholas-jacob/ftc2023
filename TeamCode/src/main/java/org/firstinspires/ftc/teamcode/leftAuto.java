@@ -73,7 +73,10 @@ public class leftAuto extends OpMode {
     boolean done=false;
     String phase="toCycle";
     boolean depositing=false;
+    boolean collecting=false;
     int state=0;
+    double collectX=0;
+    double collectY=0;
 
 
 
@@ -165,6 +168,9 @@ public class leftAuto extends OpMode {
     Trajectory middlePark=null;
     Trajectory leftPark=null;
     Trajectory rightPark=null;
+    Trajectory middleParkFinal=null;
+    Trajectory leftParkFinal=null;
+    Trajectory rightParkFinal=null;
     Trajectory cycle_position=null;
     Trajectory transition=null;
 
@@ -308,6 +314,24 @@ public class leftAuto extends OpMode {
                 .build();
         rightPark = drive.trajectoryBuilder(middlePark.end())
                 .lineToSplineHeading(new Pose2d(-12, -34, Math.toRadians(270)) )
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        leftParkFinal = drive.trajectoryBuilder(leftPark.end())
+                .lineToConstantHeading(new Vector2d(-60, -24))
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        middleParkFinal = drive.trajectoryBuilder(middlePark.end())
+                .lineToConstantHeading(new Vector2d(-36, -24) )
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                })
+                .build();
+        rightParkFinal = drive.trajectoryBuilder(rightPark.end())
+                .lineToConstantHeading(new Vector2d(-12, -24))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
@@ -468,14 +492,94 @@ public class leftAuto extends OpMode {
                 phase = "deposit1";
                 state = 0;
             }
-        } else if (Objects.equals(phase, "deposit1")) {
+        } else if (Objects.equals(phase, "deposit1")) { //deposit cone #1
+            if (state != 0 && depositing == false) {
+                phase = "collect2";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "collect2")){ //collect cone #2
+            if (state != 0 && collecting == false) {
+                phase = "deposit 2";
+                state = 0;
+            } else {
+                collecting = true;
+                collectX=485;
+                collectY=-113;
+            }
+        } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
+            if (state != 0 && depositing == false) {
+                phase = "collect3";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "collect3")){ //collect cone #3
+            if (state != 0 && collecting == false) {
+                phase = "deposit 3";
+                state = 0;
+            } else {
+                collecting = true;
+                collectX=485;
+                collectY=-160;
+            }
+        } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
+            if (state != 0 && depositing == false) {
+                phase = "collect4";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "collect4")){ //collect cone #4
+            if (state != 0 && collecting == false) {
+                phase = "deposit 4";
+                state = 0;
+            } else {
+                collecting = true;
+                collectX=485;
+                collectY=-180;
+            }
+        }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
+            if (state != 0 && depositing == false) {
+                phase = "collect5";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "collect5")){ //collect cone #5
+            if (state != 0 && collecting == false) {
+                phase = "deposit 5";
+                state = 0;
+            } else {
+                collecting = true;
+                collectX=485;
+                collectY=-200;
+            }
+        }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
+            if (state != 0 && depositing == false) {
+                phase = "collect6";
+                state = 0;
+            } else {
+                depositing = true;
+            }
+        } else if (Objects.equals(phase, "collect6")){ //collect cone #6
+            if (state != 0 && collecting == false) {
+                phase = "deposit 6";
+                state = 0;
+            } else {
+                collecting = true;
+                collectX=485;
+                collectY=-220;
+            }
+        }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
             } else {
                 depositing = true;
             }
-        } else if (Objects.equals(phase, "park")) {
+        }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
                 targetX = 0;
                 targetY = 542.75598018;
@@ -500,7 +604,16 @@ public class leftAuto extends OpMode {
                     drive.followTrajectoryAsync(rightPark);
                     state+=1;
                 }
-            } else if (state == 8) {
+            } else if (state == 8){
+                if (signal==left){
+                    drive.followTrajectoryAsync(leftParkFinal);
+                } else if (signal==middle){
+                    drive.followTrajectoryAsync(middleParkFinal);
+                } else if (signal==right){
+                    drive.followTrajectoryAsync(rightParkFinal);
+                }
+                state+=1;
+            } else if (state == 10) {
                 phase = "finish";
                 state = 0;
             }
@@ -508,8 +621,10 @@ public class leftAuto extends OpMode {
 
         } else if (Objects.equals(phase, "finish")) {
             if (state == 0) {
-                targetX = 388.43871245;
-                targetY = -320.67571868;
+                targetX=308.43871245;
+                targetY=-300.67571868;
+                gripperRotationServoPosition=1;
+                alignmentBarServo.setPosition(0.35);
                 state += 1;
             } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
@@ -529,27 +644,62 @@ public class leftAuto extends OpMode {
             } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
                     state += 1;
+                    alignmentBarServo.setPosition(alignmentBarDownPos);
+                    timer.reset();
                 }
-            } else if (state == 2) { //deploy alignment bar
-                alignmentBarServo.setPosition(alignmentBarDownPos);
-                timer.reset();
-                state += 1;
-            } else if (state == 3) { //alignment
-                if (timer.milliseconds() >= 1000) {//deposit cone
+            } else if (state == 2) {
+                if (timer.milliseconds() >= 500) {//move down
+                    targetX = -398;
+                    targetY = 741;
+                    state+=1;
+                }
+            } else if (state == 3) {
+                if (timer.milliseconds() >= 1000) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
+                    retractAlignmentBar=5;
                     state += 1;
                 }
             } else if (state == 4) {
-                if (timer.milliseconds() >= 2000) {
-                    alignmentBarServo.setPosition(alignmentBarUpPos);
+                if (timer.milliseconds() >= 1500) {
+                    frontRollerServo.setPower(0);
+                    backRollerServo.setPower(0);
+                    targetX = -396;
+                    targetY = 848;
+                }
+                if (timer.milliseconds() >= 1700) {
+                    depositing = false;
+                    state=0;
+                }
+            }
+
+        }
+        if (collecting == true) { //collect macro if collecting is set to true it will caryout nesecary collecting steps then when finish sets colecting to false
+            if (state == 0) { //to above junction
+                targetX = 486;
+                targetY = -48;
+                state += 1;
+                alignmentBarServo.setPosition(alignmentBarUpPos);
+            } else if (state == 1) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                    state += 1;
+                    targetX = collectX;
+                    targetY = collectY;
+                    frontRollerServo.setPower(1);
+                    backRollerServo.setPower(1);
+                    timer.reset();
+                }
+            } else if (state == 2) {
+                if (timer.milliseconds() >= 1000) {
+                    targetX = 486;
+                    targetY = -48;
                     frontRollerServo.setPower(0.1);
                     backRollerServo.setPower(0.1);
-                    targetX = -398;
-                    targetY = 741;
+                    state+=1;
                 }
-                if (timer.milliseconds() >= 2500) {
-                    depositing = false;
+                if (timer.milliseconds() >= 1300) {
+                    collecting = false;
+                    state=0;
                 }
             }
 
@@ -597,9 +747,6 @@ public class leftAuto extends OpMode {
         } else {
             towerRight.setPower(0);
             towerLeft.setPower(0);
-            //deal with servos once done
-            alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition = 1;
         }
 
 
