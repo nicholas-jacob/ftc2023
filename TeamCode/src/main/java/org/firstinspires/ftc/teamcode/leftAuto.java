@@ -84,26 +84,26 @@ public class leftAuto extends OpMode {
     //TW
     private PIDController twController;
     public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0;//0.27;
-
-
+    public static double Tf = 0, Ts=0, towerTolerance=10;//0.27;
 
     public static int twTarget = 0;
-    public static double towerMaxPower = 1;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
+
+    public static double towerMaxPower = 1.5;
+
     //ARM
     private PIDController armController;
 
-
     public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
-    public static double Af = 0.13;
+    public static double Af = 0.13, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    public static double armMaxPower = 1;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1.5;
 
 
     private double targetX=0;
@@ -180,6 +180,7 @@ public class leftAuto extends OpMode {
 
 
     ElapsedTime timer = new ElapsedTime();
+    ElapsedTime timeSinceStart = new ElapsedTime();
 
 
 
@@ -448,6 +449,7 @@ public class leftAuto extends OpMode {
 
     public void start() {
         /* Update the telemetry */
+        timeSinceStart.reset();
         gripperRotationServoPosition=0.35;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         frontRollerServo.setPower(0.1);
@@ -638,38 +640,45 @@ public class leftAuto extends OpMode {
 
         if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
             if (state == 0) { //to above junction
-                targetX = -396;
-                targetY = 848;
-                state += 1;
+                if (timeSinceStart.milliseconds()>=19000){
+                    state=50;
+                    depositing = false;
+                } else {
+                    targetX = -396;
+                    targetY = 848;
+                    state += 1;
+                    alignmentBarServo.setPosition(0.35);
+                    timer.reset();
+                }
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 20)) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 15) || timer.milliseconds()>=800)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 500) {//move down
+                if (timer.milliseconds() >= 600) {//move down
                     targetX = -398;
                     targetY = 741;
                     state+=1;
                 }
             } else if (state == 3) {
-                if (timer.milliseconds() >= 1000) {//deposit
+                if (timer.milliseconds() >= 900) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
                     retractAlignmentBar=5;
                     state += 1;
                 }
             } else if (state == 4) {
-                if (timer.milliseconds() >= 1500) {
-                    frontRollerServo.setPower(0);
-                    backRollerServo.setPower(0);
+                if (timer.milliseconds() >= 1100) {
                     targetX = -396;
                     targetY = 848;
                     state += 1;
                 }
             } else if (state ==5) {
-                if (timer.milliseconds() >= 1700) {
+                if (timer.milliseconds() >= 1200) {
+                    frontRollerServo.setPower(0);
+                    backRollerServo.setPower(0);
                     depositing = false;
                 }
             }
@@ -677,12 +686,20 @@ public class leftAuto extends OpMode {
         }
         if (collecting == true) { //collect macro if collecting is set to true it will caryout nesecary collecting steps then when finish sets colecting to false
             if (state == 0) { //to above junction
-                targetX = 486;
-                targetY = -48;
-                state += 1;
-                alignmentBarServo.setPosition(alignmentBarUpPos);
+                if (timeSinceStart.milliseconds()>=19000){
+                    state=50;
+                    collecting = false;
+                }
+                else {
+                    targetX = 486;
+                    targetY = -48;
+                    state += 1;
+                    alignmentBarServo.setPosition(alignmentBarUpPos);
+                    timer.reset();
+                }
+
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 20)) {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 15) || timer.milliseconds()>=800) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
@@ -691,7 +708,7 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 1000) {
+                if (timer.milliseconds() >= 700) {
                     targetX = 486;
                     targetY = -48;
                     frontRollerServo.setPower(0.1);
@@ -699,7 +716,7 @@ public class leftAuto extends OpMode {
                     state += 1;
                 }
             } else if(state == 3){
-                if (timer.milliseconds() >= 1300) {
+                if (timer.milliseconds() >= 900) {
                     collecting = false;
                 }
             }
@@ -714,7 +731,7 @@ public class leftAuto extends OpMode {
         telemetry.addData("targetX", targetX);
         telemetry.addData("targetY", targetY);
         telemetry.addData("armTarget", armTarget);
-        telemetry.addData("armError", armController.getVelocityError());
+        telemetry.addData("armError", armController.getPositionError());
         telemetry.addData("towerTarget", twTarget);
         telemetry.addData("towerError", twController.getPositionError());
         drive.update();
@@ -740,44 +757,49 @@ public class leftAuto extends OpMode {
         //tower controller
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
-        if (towerPid > towerMaxPower) {
-            towerPid = towerMaxPower;
-        }
-        if (towerPid < -towerMaxPower) {
-            towerPid = -towerMaxPower;
-        }
         double towerFf = Tf;
-
-
-        double towerPower = towerPid + towerFf;
-        if (!done) {
-            towerRight.setPower(towerPower);
-            towerLeft.setPower(towerPower);
-        } else {
-            towerRight.setPower(0);
-            towerLeft.setPower(0);
+        double towerFs=0;
+        if (twController.getPositionError()>towerTolerance){ //static friction code
+            towerFs=Ts;
+        } else if(twController.getPositionError()<-towerTolerance) {
+            towerFs = -Ts;
         }
-
+        double towerPower = towerPid + towerFs;
+        if (towerPower>towerMaxPower){
+            towerPower=towerMaxPower;
+        }
+        if (towerPower<-towerMaxPower){
+            towerPower=-towerMaxPower;
+        }
+        towerPower+=towerFf;
 
         //arm controller
         armController.setPID(Ap, Ai, Ad);
-
-
         double armPid = armController.calculate(armPos, armTarget);
-        if (armPid > armMaxPower) {
-            armPid = armMaxPower;
+        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        double armFs = 0;
+        if (armController.getPositionError()>armTolerance){
+            armFs=As;
+        } else if(armController.getPositionError()<-armTolerance) {
+            armFs=-As;
         }
-        if (armPid < -armMaxPower) {
-            armPid = -armMaxPower;
+        double armPower = armPid + armFs;
+        if (armPower>armMaxPower){
+            armPid=armMaxPower;
         }
-        double armFf = -Math.sin((armPos / ticksPerRadian) - 0.236) * Af;
-
-
-        double armPower = armPid + armFf;
-        if (!done) {
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
+        armPower+=armFf;
+        if (!done){
+            towerRight.setPower(towerPower);
+            towerLeft.setPower(towerPower);
             armMotor.setPower(armPower);
-        } else {
+        }
+        else{
             armMotor.setPower(0);
+            towerRight.setPower(0);
+            towerLeft.setPower(0);
         }
 
 

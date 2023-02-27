@@ -67,25 +67,27 @@ public class ParkAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.035, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.06;
+    public static double Tp=0.03, Ti = 0, Td = 0.0014;
+    public static double Tf = 0, Ts=0, towerTolerance=10;//0.27;
 
     public static int twTarget = 0;
-    public static double towerMaxPower = 1;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
+
+    public static double towerMaxPower = 1.5;
+
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
-    public static double Af = 0.13;
-
+    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.13, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    public static double armMaxPower = 1;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1.5;
 
     private double targetX=0;
     private double targetY=0;
@@ -424,43 +426,49 @@ public class ParkAuto extends OpMode {
         //tower controller
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
-        if (towerPid>towerMaxPower){
-            towerPid=towerMaxPower;
-        }
-        if (towerPid<-towerMaxPower){
-            towerPid=-towerMaxPower;
-        }
         double towerFf = Tf;
-
-        double towerPower = towerPid + towerFf;
-        if (!done){
-            towerRight.setPower(towerPower);
-            towerLeft.setPower(towerPower);
+        double towerFs=0;
+        if (twController.getPositionError()>towerTolerance){ //static friction code
+            towerFs=Ts;
+        } else if(twController.getPositionError()<-towerTolerance) {
+            towerFs = -Ts;
         }
-        else{
-            towerRight.setPower(0);
-            towerLeft.setPower(0);
+        double towerPower = towerPid + towerFs;
+        if (towerPower>towerMaxPower){
+            towerPower=towerMaxPower;
         }
-
+        if (towerPower<-towerMaxPower){
+            towerPower=-towerMaxPower;
+        }
+        towerPower+=towerFf;
 
         //arm controller
         armController.setPID(Ap, Ai, Ad);
-
         double armPid = armController.calculate(armPos, armTarget);
-        if (armPid>armMaxPower){
+        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        double armFs = 0;
+        if (armController.getPositionError()>armTolerance){
+            armFs=As;
+        } else if(armController.getPositionError()<-armTolerance) {
+            armFs=-As;
+        }
+        double armPower = armPid + armFs;
+        if (armPower>armMaxPower){
             armPid=armMaxPower;
         }
         if (armPid<-armMaxPower){
             armPid=-armMaxPower;
         }
-        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
-
-        double armPower = armPid + armFf;
+        armPower+=armFf;
         if (!done){
+            towerRight.setPower(towerPower);
+            towerLeft.setPower(towerPower);
             armMotor.setPower(armPower);
         }
         else{
             armMotor.setPower(0);
+            towerRight.setPower(0);
+            towerLeft.setPower(0);
         }
 
 

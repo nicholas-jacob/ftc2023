@@ -36,27 +36,27 @@ public class TeleOp2023V3 extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.035, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.06;
+    public static double Tp=0.03, Ti = 0, Td = 0.0014;
+    public static double Tf = 0, Ts=0, towerTolerance=10;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
 
-    public static double towerMaxPower = 1;
+    public static double towerMaxPower = 1.5;
 
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
-    public static double Af = 0.13;
+    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.13, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
-    public static double armMaxPower = 1;
+    public static double armMaxPower = 1.5;
 
     private double targetX=0;
     private double targetY=0;
@@ -252,6 +252,7 @@ public class TeleOp2023V3 extends OpMode {
         if (gamepad2.left_bumper){
             targetX=-137;
             targetY=735;
+            alignmentBarServo.setPosition(0.4);
         }
 
         targetX+=(gamepad2.left_stick_x)*7;
@@ -309,29 +310,41 @@ public class TeleOp2023V3 extends OpMode {
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
-        if (towerPid>towerMaxPower){
-            towerPid=towerMaxPower;
+        double towerFs=0;
+        if (twController.getPositionError()>towerTolerance){ //static friction code
+            towerFs=Ts;
+        } else if(twController.getPositionError()<-towerTolerance) {
+            towerFs = -Ts;
         }
-        if (towerPid<-towerMaxPower){
-            towerPid=-towerMaxPower;
+        double towerPower = towerPid + towerFs;
+        if (towerPower>towerMaxPower){
+            towerPower=towerMaxPower;
         }
-        double towerPower = towerPid + towerFf;
+        if (towerPower<-towerMaxPower){
+            towerPower=-towerMaxPower;
+        }
+        towerPower+=towerFf;
         towerRight.setPower(towerPower);
         towerLeft.setPower(towerPower);
 
         //arm controller
         armController.setPID(Ap, Ai, Ad);
-
         double armPid = armController.calculate(armPos, armTarget);
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
-        if (armPid>armMaxPower){
+        double armFs = 0;
+        if (armController.getPositionError()>armTolerance){
+            armFs=As;
+        } else if(armController.getPositionError()<-armTolerance) {
+            armFs=-As;
+        }
+        double armPower = armPid + armFs;
+        if (armPower>armMaxPower){
             armPid=armMaxPower;
         }
         if (armPid<-armMaxPower){
             armPid=-armMaxPower;
         }
-
-        double armPower = armPid + armFf;
+        armPower+=armFf;
         armMotor.setPower(armPower);
 
 
