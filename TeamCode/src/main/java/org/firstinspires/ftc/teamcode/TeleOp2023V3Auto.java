@@ -34,8 +34,8 @@ public class TeleOp2023V3Auto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0, Ts=0, towerTolerance=10;//0.27;
+    public static double Tp=0.03, Ti = 0, Td = 0.001;
+    public static double Tf = 0.04, Ts=0, towerTolerance=8;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
@@ -47,8 +47,8 @@ public class TeleOp2023V3Auto extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
-    public static double Af = 0.13, As = 0, armTolerance= 50;
+    public static double Ap = 0.005, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.15, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
