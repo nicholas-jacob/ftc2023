@@ -360,8 +360,8 @@ public class ParkAuto extends OpMode {
 
     public void loop(){
         if (state==0) {
-            targetX = 0;
-            targetY = 542.75598018;
+            targetX=231;
+            targetY=494;
             state+=1;
         }
         else if (state==1){

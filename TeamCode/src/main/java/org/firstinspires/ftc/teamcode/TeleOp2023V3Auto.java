@@ -204,8 +204,8 @@ public class TeleOp2023V3Auto extends OpMode {
     public void start() {
         gripperRotationServoPosition=0.35;
         alignmentBarServo.setPosition(alignmentBarUpPos);
-        targetX=0;
-        targetY=545;
+        targetX=231;
+        targetY=494;
     }
 
 

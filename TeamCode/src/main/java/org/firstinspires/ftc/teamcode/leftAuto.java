@@ -480,8 +480,8 @@ public class leftAuto extends OpMode {
     public void loop() {
         if (Objects.equals(phase, "toCycle")) {
             if (state == 0) {
-                targetX = 0;
-                targetY = 542.75598018;
+                targetX=231;
+                targetY=494;
                 state += 1;
             } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
@@ -500,6 +500,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         } else if (Objects.equals(phase, "collect2")){ //collect cone #2
             if (state != 0 && collecting == false) {
@@ -507,6 +508,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
+                gripperRotationServoPosition=0.2;
                 collectX=485;
                 collectY=-143;
             }
@@ -516,6 +518,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         } else if (Objects.equals(phase, "collect3")){ //collect cone #3
             if (state != 0 && collecting == false) {
@@ -523,6 +526,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
+                gripperRotationServoPosition=0.2;
                 collectX=485;
                 collectY=-160;
             }
@@ -532,6 +536,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         } else if (Objects.equals(phase, "collect4")){ //collect cone #4
             if (state != 0 && collecting == false) {
@@ -539,6 +544,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
+                gripperRotationServoPosition=0.2;
                 collectX=485;
                 collectY=-180;
             }
@@ -548,6 +554,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         } else if (Objects.equals(phase, "collect5")){ //collect cone #5
             if (state != 0 && collecting == false) {
@@ -555,6 +562,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
+                gripperRotationServoPosition=0.2;
                 collectX=485;
                 collectY=-200;
             }
@@ -564,6 +572,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         } else if (Objects.equals(phase, "collect6")){ //collect cone #6
             if (state != 0 && collecting == false) {
@@ -571,6 +580,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
+                gripperRotationServoPosition=0.2;
                 collectX=485;
                 collectY=-220;
             }
@@ -580,11 +590,12 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 depositing = true;
+                gripperRotationServoPosition=0.35;
             }
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
-                targetX = 0;
-                targetY = 542.75598018;
+                targetX=231;
+                targetY=494;
                 state += 1;
             } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
