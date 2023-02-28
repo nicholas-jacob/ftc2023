@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -31,6 +32,9 @@ public class TeleOp2023V3Auto extends OpMode {
     private DcMotorEx frontLeftMotor;
     private DcMotorEx backRightMotor;
     private DcMotorEx backLeftMotor;
+    private BNO055IMU imu;
+    private double angleOffset=0;
+    private boolean foc=true;
 
     //TW
     private PIDController twController;
@@ -87,6 +91,11 @@ public class TeleOp2023V3Auto extends OpMode {
         backRightMotor = hardwareMap.get(DcMotorEx.class, "motorBackRight");
         backLeftMotor = hardwareMap.get(DcMotorEx.class, "motorBackLeft");
         mecanum = new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        imu.initialize(parameters);
+        angleOffset=imu.getAngularOrientation().firstAngle;
 
         frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -204,7 +213,25 @@ public class TeleOp2023V3Auto extends OpMode {
     public void loop() {
 
         //dt code
-        mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+        if (gamepad1.dpad_up){
+            angleOffset=imu.getAngularOrientation().firstAngle;
+        }
+        if (gamepad1.a){
+            foc = true;
+        }
+        if (gamepad1.b){
+            foc = false;
+        }
+        if (foc){ //disables foc if foc variable is false
+            double angle=imu.getAngularOrientation().firstAngle-angleOffset;
+            double X= gamepad1.left_stick_x;
+            double Y= gamepad1.left_stick_y;
+            double Xprime=X*Math.cos(angle)-Y*Math.sin(angle);
+            double Yprime=X*Math.sin(angle)+Y*Math.cos(angle);
+            mecanum.Drive(Xprime, Yprime, gamepad1.right_stick_x);
+        } else{
+            mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+        }
 
         // finite state machine goes here
         int towerPos = towerRight.getCurrentPosition();
