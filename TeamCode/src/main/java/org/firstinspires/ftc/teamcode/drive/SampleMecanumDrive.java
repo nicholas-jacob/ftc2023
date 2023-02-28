@@ -75,7 +75,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
     //uncoment for tuning
-//    private DcMotorEx armMotor;
+    private DcMotorEx armMotor;
 
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -124,13 +124,13 @@ public class SampleMecanumDrive extends MecanumDrive {
         rightRear = hardwareMap.get(DcMotorEx.class, "motorBackRight");
         rightFront = hardwareMap.get(DcMotorEx.class, "motorFrontRight");
         //uncoment for tuning
-//        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
-//        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        armMotor.setTargetPosition(0);
-//        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        armMotor.setTargetPosition(0);
-//        armMotor.setPower(1);
+        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setTargetPosition(0);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(0);
+        armMotor.setPower(1);
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
