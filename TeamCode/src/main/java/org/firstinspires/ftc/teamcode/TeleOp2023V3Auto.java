@@ -216,39 +216,59 @@ public class TeleOp2023V3Auto extends OpMode {
         //intakePosition
         if (gamepad2.right_bumper){
             targetX=480;
-            targetY=-182;
+            targetY=-202;
             alignmentBarServo.setPosition(alignmentBarUpPos);
+            gripperRotationServoPosition=0.2;
+        }
+        //intake stack
+        if (gamepad2.right_trigger>=0.5){
+            targetX = 486;
+            targetY = -48;
+            alignmentBarServo.setPosition(alignmentBarUpPos);
+            gripperRotationServoPosition=0.2;
         }
         //groundJunction
         if (gamepad2.dpad_down){
-            targetX=-133.9373;
-            targetY=-157.6818;
+            targetX=-359;
+            targetY=-17;
             alignmentBarServo.setPosition(alignmentBarUpPos);
+            gripperRotationServoPosition=0.35;
         }
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=-438;
-            targetY=246;
+            targetY=256;
             alignmentBarServo.setPosition(alignmentBarUpPos);
+            gripperRotationServoPosition=0.35;
         }
         //midJunction
         if (gamepad2.dpad_right){
-            targetX=547;
-            targetY=-358;
-            alignmentBarServo.setPosition(alignmentBarUpPos);
+            targetX=-299;
+            targetY=518;
+            alignmentBarServo.setPosition(0.4);
+            gripperRotationServoPosition=0.35;
 
         }
         //highJunction
         if (gamepad2.dpad_up){
-            targetX=-15;
-            targetY=722.4;
-            alignmentBarServo.setPosition(alignmentBarUpPos);
+            targetX=81;
+            targetY=663;
+            alignmentBarServo.setPosition(0.4);
+            gripperRotationServoPosition=0.35;
         }
         //highCycle
         if (gamepad2.left_bumper){
             targetX=-137;
             targetY=735;
             alignmentBarServo.setPosition(0.4);
+            gripperRotationServoPosition=0.35;
+        }
+        //highStack
+        if (gamepad2.left_trigger>0.5){
+            targetX = -396;
+            targetY = 848;
+            alignmentBarServo.setPosition(0.4);
+            gripperRotationServoPosition=0.35;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;
@@ -264,7 +284,7 @@ public class TeleOp2023V3Auto extends OpMode {
             if (gamepad2.b){
                 frontRollerServo.setPower(-1);
                 backRollerServo.setPower(-1);
-                retractAlignmentBar=5;
+                retractAlignmentBar=3;
             }
             else{
                 frontRollerServo.setPower(0.1);

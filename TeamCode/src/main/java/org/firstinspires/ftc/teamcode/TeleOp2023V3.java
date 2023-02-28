@@ -239,7 +239,7 @@ public class TeleOp2023V3 extends OpMode {
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=-438;
-            targetY=246;
+            targetY=256;
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.35;
         }
