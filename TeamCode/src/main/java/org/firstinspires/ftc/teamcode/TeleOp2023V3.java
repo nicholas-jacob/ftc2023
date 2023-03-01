@@ -294,8 +294,8 @@ public class TeleOp2023V3 extends OpMode {
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
-            targetX = -396;
-            targetY = 848;
+            targetX = -356;
+            targetY = 798;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }

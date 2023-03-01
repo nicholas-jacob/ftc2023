@@ -283,13 +283,13 @@ public class leftAuto extends OpMode {
 
 
         startPose = new Pose2d(-38.465, -61.8125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(-56, -8);
+        cycle_positionVector = new Vector2d(-56, -4);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(-30,-36), Math.toRadians(90))
-                .splineTo(new Vector2d(-50, -14), Math.toRadians(194.0362))
+                .splineTo(new Vector2d(-50, -14), Math.toRadians(190))
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
@@ -651,42 +651,30 @@ public class leftAuto extends OpMode {
 
         if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
             if (state == 0) { //to above junction
-                if (timeSinceStart.milliseconds()>=19000){
+                if (timeSinceStart.milliseconds()>=40000){
                     state=50;
                     depositing = false;
                 } else {
-                    targetX = -396;
-                    targetY = 848;
+                    targetX = -356;
+                    targetY = 798;
                     state += 1;
                     alignmentBarServo.setPosition(0.35);
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 15) || timer.milliseconds()>=800)  {
+                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10) || timer.milliseconds()>=800)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 600) {//move down
-                    targetX = -398;
-                    targetY = 741;
-                    state+=1;
-                }
-            } else if (state == 3) {
                 if (timer.milliseconds() >= 900) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
-                    retractAlignmentBar=5;
+                    retractAlignmentBar=6;
                     state += 1;
                 }
-            } else if (state == 4) {
-                if (timer.milliseconds() >= 1100) {
-                    targetX = -396;
-                    targetY = 848;
-                    state += 1;
-                }
-            } else if (state ==5) {
+            } else if (state ==3) {
                 if (timer.milliseconds() >= 1200) {
                     frontRollerServo.setPower(0);
                     backRollerServo.setPower(0);
@@ -697,7 +685,7 @@ public class leftAuto extends OpMode {
         }
         if (collecting == true) { //collect macro if collecting is set to true it will caryout nesecary collecting steps then when finish sets colecting to false
             if (state == 0) { //to above junction
-                if (timeSinceStart.milliseconds()>=19000){
+                if (timeSinceStart.milliseconds()>=40000){
                     state=50;
                     collecting = false;
                 }
