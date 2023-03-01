@@ -164,8 +164,7 @@ public class leftAuto extends OpMode {
 
 
     Pose2d startPose=null;
-    Vector2d depositPositionVector=null;
-    Vector2d collectPositionVector=null;
+    Vector2d cycle_positionVector=null;
     Trajectory middlePark=null;
     Trajectory leftPark=null;
     Trajectory rightPark=null;
@@ -173,8 +172,6 @@ public class leftAuto extends OpMode {
     Trajectory leftParkFinal=null;
     Trajectory rightParkFinal=null;
     Trajectory cycle_position=null;
-    Trajectory toCollect=null;
-    Trajectory toDeposit=null;
     Trajectory transition=null;
 
 
@@ -286,23 +283,17 @@ public class leftAuto extends OpMode {
 
 
         startPose = new Pose2d(-36, -61.8125, Math.toRadians(90));
-        depositPositionVector = new Vector2d(-59, -11.5);
-        collectPositionVector = new Vector2d(-59.0001, -11.5);
+        cycle_positionVector = new Vector2d(-58, -5.5);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineTo(new Vector2d(-36,-24))
-                .splineToSplineHeading(new Pose2d(depositPositionVector, Math.toRadians(200.66)), Math.toRadians(160))
+                .splineTo(new Vector2d(-50, -14), Math.toRadians(190.0362))
+                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
-                .build();
-        toCollect = drive.trajectoryBuilder(cycle_position.end())
-                .lineToSplineHeading(new Pose2d(collectPositionVector, Math.toRadians(180)))
-                .build();
-        toDeposit = drive.trajectoryBuilder(toCollect.end(), true)
-                .lineToSplineHeading(new Pose2d(depositPositionVector, Math.toRadians(200.66)))
                 .build();
         transition = drive.trajectoryBuilder(cycle_position.end())
                 .lineToSplineHeading(new Pose2d(-59, -24, Math.toRadians(180 - 14.0362)))
@@ -506,7 +497,6 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "deposit1")) { //deposit cone #1
             if (state != 0 && depositing == false) {
                 phase = "collect2";
-                drive.followTrajectoryAsync(toCollect);
                 state = 0;
             } else {
                 depositing = true;
@@ -515,18 +505,16 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "collect2")){ //collect cone #2
             if (state != 0 && collecting == false) {
                 phase = "deposit2";
-                drive.followTrajectoryAsync(toDeposit);
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.25;
-                collectX=485;
+                collectX=455;
                 collectY=-143;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
                 phase = "collect3";
-                drive.followTrajectoryAsync(toCollect);
                 state = 0;
             } else {
                 depositing = true;
@@ -535,18 +523,16 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "collect3")){ //collect cone #3
             if (state != 0 && collecting == false) {
                 phase = "deposit3";
-                drive.followTrajectoryAsync(toDeposit);
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.25;
-                collectX=485;
+                collectX=455;
                 collectY=-160;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
             if (state != 0 && depositing == false) {
                 phase = "collect4";
-                drive.followTrajectoryAsync(toCollect);
                 state = 0;
             } else {
                 depositing = true;
@@ -555,18 +541,16 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "collect4")){ //collect cone #4
             if (state != 0 && collecting == false) {
                 phase = "deposit4";
-                drive.followTrajectoryAsync(toDeposit);
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.25;
-                collectX=485;
+                collectX=455;
                 collectY=-180;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
             if (state != 0 && depositing == false) {
                 phase = "collect5";
-                drive.followTrajectoryAsync(toCollect);
                 state = 0;
             } else {
                 depositing = true;
@@ -575,18 +559,16 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "collect5")){ //collect cone #5
             if (state != 0 && collecting == false) {
                 phase = "deposit5";
-                drive.followTrajectoryAsync(toDeposit);
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.25;
-                collectX=485;
+                collectX=455;
                 collectY=-200;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
                 phase = "collect6";
-                drive.followTrajectoryAsync(toCollect);
                 state = 0;
             } else {
                 depositing = true;
@@ -595,12 +577,11 @@ public class leftAuto extends OpMode {
         } else if (Objects.equals(phase, "collect6")){ //collect cone #6
             if (state != 0 && collecting == false) {
                 phase = "deposit6";
-                drive.followTrajectoryAsync(toDeposit);
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.25;
-                collectX=485;
+                collectX=455;
                 collectY=-220;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
@@ -672,7 +653,7 @@ public class leftAuto extends OpMode {
                     state=50;
                     depositing = false;
                 } else {
-                    targetX = -356;
+                    targetX = -366;
                     targetY = 798;
                     state += 1;
                     alignmentBarServo.setPosition(0.35);
@@ -707,7 +688,7 @@ public class leftAuto extends OpMode {
                     collecting = false;
                 }
                 else {
-                    targetX = 486;
+                    targetX = 456;
                     targetY = -48;
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarUpPos);
