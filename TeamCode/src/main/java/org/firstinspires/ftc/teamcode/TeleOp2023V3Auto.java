@@ -216,6 +216,15 @@ public class TeleOp2023V3Auto extends OpMode {
         if (gamepad1.dpad_up){
             angleOffset=imu.getAngularOrientation().firstAngle;
         }
+        if (gamepad1.dpad_left){
+            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(90);
+        }
+        if (gamepad1.dpad_down){
+            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(180);
+        }
+        if (gamepad1.dpad_right){
+            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(270);
+        }
         if (gamepad1.a){
             foc = true;
         }
