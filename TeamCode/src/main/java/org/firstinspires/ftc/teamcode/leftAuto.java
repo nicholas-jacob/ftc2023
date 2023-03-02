@@ -290,7 +290,7 @@ public class leftAuto extends OpMode {
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineTo(new Vector2d(-36,-24))
-                .splineTo(new Vector2d(-50, -14), Math.toRadians(190.0362))
+                .splineTo(new Vector2d(-50, -14), Math.toRadians(192.0362))//og angle is 194.0362
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
@@ -426,8 +426,8 @@ public class leftAuto extends OpMode {
                 signal = middle;
             }
         } else {
-            telemetry.addLine("will go left Bc didn't find anything");
-            signal = left;
+            telemetry.addLine("will go right Bc didn't find anything");
+            signal = right;
         }
         telemetry.update();
     }
@@ -501,7 +501,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=430;
+                collectX=440;
                 collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
@@ -519,7 +519,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=422;
+                collectX=435;
                 collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
@@ -537,7 +537,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=404;
+                collectX=424;
                 collectY=-230;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
@@ -555,7 +555,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=400;
+                collectX=422;
                 collectY=-260;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
@@ -573,7 +573,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=390;
+                collectX=416;
                 collectY=-290;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
@@ -634,7 +634,7 @@ public class leftAuto extends OpMode {
                     depositing = false;
                 } else {
                     targetX = -366;
-                    targetY = 798;
+                    targetY = 798-20;
                     state += 1;
                     alignmentBarServo.setPosition(0.35);
                     timer.reset();
