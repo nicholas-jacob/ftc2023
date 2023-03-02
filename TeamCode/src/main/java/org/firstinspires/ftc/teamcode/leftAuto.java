@@ -501,7 +501,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=455;
+                collectX=430;
                 collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
@@ -519,7 +519,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=455;
+                collectX=422;
                 collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
@@ -537,7 +537,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=455;
+                collectX=404;
                 collectY=-230;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
@@ -555,7 +555,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=455;
+                collectX=400;
                 collectY=-260;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
@@ -573,7 +573,7 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
-                collectX=455;
+                collectX=390;
                 collectY=-290;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
