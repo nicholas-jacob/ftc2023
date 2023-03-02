@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.OpenCV.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -150,7 +151,7 @@ public class leftAuto extends OpMode {
     int left = 1;
     int middle = 2;
     int right = 3;
-    int signal = 2;
+    int signal = 3;
 
 
     AprilTagDetection tagOfInterest = null;
@@ -293,53 +294,44 @@ public class leftAuto extends OpMode {
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
+                    drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 })
                 .build();
-        transition = drive.trajectoryBuilder(cycle_position.end())
-                .lineToSplineHeading(new Pose2d(-59, -24, Math.toRadians(180 - 14.0362)))
+        leftPark = drive.trajectoryBuilder(cycle_position.end())
                 .addDisplacementMarker(() -> {
-                    state+=1;
+                    drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 })
-                .build();
-        leftPark = drive.trajectoryBuilder(transition.end())
-                .lineToSplineHeading(new Pose2d(-60, -34, Math.toRadians(270)))
+                .lineToSplineHeading(new Pose2d(-59, -11.75, Math.toRadians(180)),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
+                    targetX=288.43871245;
+                    targetY=-350.67571868;
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(leftPark.end())
-                .lineToSplineHeading(new Pose2d(-36, -34, Math.toRadians(270)) )
+                .lineToConstantHeading(new Vector2d(-35.5, -11.75),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        rightPark = drive.trajectoryBuilder(middlePark.end())
-                .lineToSplineHeading(new Pose2d(-12, -34, Math.toRadians(270)) )
+        rightPark = drive.trajectoryBuilder(leftPark.end())
+                .lineToConstantHeading(new Vector2d(-13, -11.75),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        leftParkFinal = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-60, -24))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        middleParkFinal = drive.trajectoryBuilder(middlePark.end())
-                .lineToConstantHeading(new Vector2d(-36, -24) )
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        rightParkFinal = drive.trajectoryBuilder(rightPark.end())
-                .lineToConstantHeading(new Vector2d(-12, -24))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-
-
-
 
 
     }
@@ -434,8 +426,8 @@ public class leftAuto extends OpMode {
                 signal = middle;
             }
         } else {
-            telemetry.addLine("will go middle Bc didn't find anything");
-            signal = middle;
+            telemetry.addLine("will go left Bc didn't find anything");
+            signal = left;
         }
         telemetry.update();
     }
@@ -508,7 +500,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.25;
+                gripperRotationServoPosition=0.20;
                 collectX=455;
                 collectY=-143;
             }
@@ -526,7 +518,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.25;
+                gripperRotationServoPosition=0.20;
                 collectX=455;
                 collectY=-160;
             }
@@ -544,7 +536,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.25;
+                gripperRotationServoPosition=0.20;
                 collectX=455;
                 collectY=-180;
             }
@@ -562,7 +554,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.25;
+                gripperRotationServoPosition=0.20;
                 collectX=455;
                 collectY=-200;
             }
@@ -580,7 +572,7 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.25;
+                gripperRotationServoPosition=0.20;
                 collectX=455;
                 collectY=-220;
             }
@@ -595,17 +587,14 @@ public class leftAuto extends OpMode {
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
                 targetX=288.43871245;
-                targetY=-340.67571868;
+                targetY=-350.67571868+300;
                 gripperRotationServoPosition=1;
-                alignmentBarServo.setPosition(0.35);
+                alignmentBarServo.setPosition(0.20);
                 state += 1;
             } else if (state == 1) {
-                drive.followTrajectoryAsync(transition);
-                state+=1;
-            } else if (state == 3) {
                 drive.followTrajectoryAsync(leftPark);
                 state+=1;
-            } else if (state == 5) {
+            } else if (state == 3) {
                 if (signal==left){
                     state+=2;
                 } else if (signal==middle){
@@ -615,16 +604,7 @@ public class leftAuto extends OpMode {
                     drive.followTrajectoryAsync(rightPark);
                     state+=1;
                 }
-            } else if (state == 7){
-                if (signal==left){
-                    drive.followTrajectoryAsync(leftParkFinal);
-                } else if (signal==middle){
-                    drive.followTrajectoryAsync(middleParkFinal);
-                } else if (signal==right){
-                    drive.followTrajectoryAsync(rightParkFinal);
-                }
-                state+=1;
-            } else if (state == 9) {
+            } else if (state == 5) {
                 phase = "finish";
                 state = 0;
             }
@@ -660,7 +640,7 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 15) || timer.milliseconds()>1000)  {
+                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 15) || timer.milliseconds()>1200)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     timer.reset();
