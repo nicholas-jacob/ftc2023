@@ -502,7 +502,7 @@ public class leftAuto extends OpMode {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
                 collectX=455;
-                collectY=-143;
+                collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -520,7 +520,7 @@ public class leftAuto extends OpMode {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
                 collectX=455;
-                collectY=-160;
+                collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
             if (state != 0 && depositing == false) {
@@ -538,7 +538,7 @@ public class leftAuto extends OpMode {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
                 collectX=455;
-                collectY=-180;
+                collectY=-230;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
             if (state != 0 && depositing == false) {
@@ -556,7 +556,7 @@ public class leftAuto extends OpMode {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
                 collectX=455;
-                collectY=-200;
+                collectY=-260;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
@@ -574,7 +574,7 @@ public class leftAuto extends OpMode {
                 collecting = true;
                 gripperRotationServoPosition=0.20;
                 collectX=455;
-                collectY=-220;
+                collectY=-290;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
             if (state != 0 && depositing == false) {
@@ -640,20 +640,20 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 15) || timer.milliseconds()>1200)  {
+                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>1200)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 400) {//deposit
+                if (timer.milliseconds() >= 500) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
                     retractAlignmentBar=6;
                     state += 1;
                 }
             } else if (state ==3) {
-                if (timer.milliseconds() >= 600) {
+                if (timer.milliseconds() >= 700) {
                     frontRollerServo.setPower(0);
                     backRollerServo.setPower(0);
                     depositing = false;
@@ -676,7 +676,7 @@ public class leftAuto extends OpMode {
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 15) || timer.milliseconds()>=800) {
+                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>=1000) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
@@ -685,15 +685,15 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 700) {
-                    targetX = 466;
+                if (timer.milliseconds() >= 600) {
+                    targetX = 456;
                     targetY = -48;
                     frontRollerServo.setPower(0.1);
                     backRollerServo.setPower(0.1);
                     state += 1;
                 }
             } else if(state == 3){
-                if (timer.milliseconds() >= 900) {
+                if (timer.milliseconds() >= 700) {
                     collecting = false;
                 }
             }
