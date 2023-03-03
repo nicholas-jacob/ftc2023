@@ -71,7 +71,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.75;
+    private final double alignmentBarUpPos = 0.65;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -219,13 +219,13 @@ public class TeleOp2023V3 extends OpMode {
         if (gamepad1.dpad_up){
             angleOffset=imu.getAngularOrientation().firstAngle;
         }
-        if (gamepad1.dpad_left){
+        if (gamepad1.dpad_right){
             angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(90);
         }
         if (gamepad1.dpad_down){
             angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(180);
         }
-        if (gamepad1.dpad_right){
+        if (gamepad1.dpad_left){
             angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(270);
         }
 
@@ -275,8 +275,8 @@ public class TeleOp2023V3 extends OpMode {
         }
         //lowJunction
         if (gamepad2.dpad_left){
-            targetX=-438;
-            targetY=256;
+            targetX=409.7;
+            targetY=112;
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.35;
         }
@@ -290,15 +290,15 @@ public class TeleOp2023V3 extends OpMode {
         }
         //highJunction
         if (gamepad2.dpad_up){
-            targetX=81;
-            targetY=663;
+            targetX=18;
+            targetY=671;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }
         //highCycle
         if (gamepad2.left_bumper){
             targetX=-137;
-            targetY=735;
+            targetY=716;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }
