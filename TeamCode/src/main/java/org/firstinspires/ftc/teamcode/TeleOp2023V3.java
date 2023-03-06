@@ -71,7 +71,7 @@ public class TeleOp2023V3 extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.65;
+    private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -151,7 +151,7 @@ public class TeleOp2023V3 extends OpMode {
 
     public void init_loop() {
         //inverse kinematics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
@@ -246,7 +246,7 @@ public class TeleOp2023V3 extends OpMode {
             mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         }
         // finite state machine goes here
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         double targetXLast=targetX;
         double targetYLast=targetY;

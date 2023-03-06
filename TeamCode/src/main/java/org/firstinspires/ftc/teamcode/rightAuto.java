@@ -25,30 +25,44 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.OpenCV.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.OpenCV.AprilTagDetectionPipeline;
+
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.openftc.apriltag.AprilTagDetection;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Timer;
 
 
 @Autonomous
@@ -70,27 +84,27 @@ public class rightAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.035, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.06;
-
-
+    public static double Tp=0.03, Ti = 0, Td = 0.001;
+    public static double Tf = 0.04, Ts=0, towerTolerance=8;//0.27;
 
     public static int twTarget = 0;
-    public static double towerMaxPower = 1;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
+
+    public static double towerMaxPower = 1.5;
+
     //ARM
     private PIDController armController;
 
-
-    public static double Ap = 0.001, Ai = 0, Ad = 0.0008;
-    public static double Af = 0.13;
+    public static double Ap = 0.005, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.15, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    public static double armMaxPower = 1;
     private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1.5;
 
 
     private double targetX=0;
@@ -104,7 +118,7 @@ public class rightAuto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.65;
+    private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -137,7 +151,7 @@ public class rightAuto extends OpMode {
     int left = 1;
     int middle = 2;
     int right = 3;
-    int signal = 2;
+    int signal = 3;
 
 
     AprilTagDetection tagOfInterest = null;
@@ -167,6 +181,7 @@ public class rightAuto extends OpMode {
 
 
     ElapsedTime timer = new ElapsedTime();
+    ElapsedTime timeSinceStart = new ElapsedTime();
 
 
 
@@ -268,64 +283,55 @@ public class rightAuto extends OpMode {
 
 
 
-        startPose = new Pose2d(38.465, -61.8125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(56, -8);
+        startPose = new Pose2d(36, -61.3125, Math.toRadians(90));
+        cycle_positionVector = new Vector2d(58, -6.5);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(31,-36), Math.toRadians(90))
-                .splineTo(new Vector2d(50, -14), Math.toRadians(-14.0362))
-                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
+                .lineTo(new Vector2d(36,-24))
+                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-12.0362))//og angle is 194.0362
+                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90-14.0362))
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                    drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                })
+                .build();
+        rightPark = drive.trajectoryBuilder(cycle_position.end())
+                .addDisplacementMarker(() -> {
+                    drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                })
+                .lineToSplineHeading(new Pose2d(61, -11.75, Math.toRadians(0)),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
+                .addDisplacementMarker(() -> {
+                    state+=1;
+                    targetX=288.43871245;
+                    targetY=-350.67571868;
+                })
+                .build();
+        middlePark = drive.trajectoryBuilder(rightPark.end())
+                .lineToConstantHeading(new Vector2d(35.5, -11.75),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        transition = drive.trajectoryBuilder(cycle_position.end())
-                .lineToSplineHeading(new Pose2d(59, -24, Math.toRadians(-14.0362)))
+        leftPark = drive.trajectoryBuilder(rightPark.end())
+                .lineToConstantHeading(new Vector2d(13, -11.75),
+                        SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        leftPark = drive.trajectoryBuilder(transition.end())
-                .lineToSplineHeading(new Pose2d(60, -34, Math.toRadians(270)))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        middlePark = drive.trajectoryBuilder(leftPark.end())
-                .lineToSplineHeading(new Pose2d(36, -34, Math.toRadians(270)) )
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        rightPark = drive.trajectoryBuilder(middlePark.end())
-                .lineToSplineHeading(new Pose2d(12, -34, Math.toRadians(270)) )
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        leftParkFinal = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(60, -24))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        middleParkFinal = drive.trajectoryBuilder(middlePark.end())
-                .lineToConstantHeading(new Vector2d(36, -24) )
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        rightParkFinal = drive.trajectoryBuilder(rightPark.end())
-                .lineToConstantHeading(new Vector2d(12, -24))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-
-
-
 
 
     }
@@ -335,7 +341,7 @@ public class rightAuto extends OpMode {
 
     public void init_loop() {
         //inverse kinematics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
@@ -420,8 +426,8 @@ public class rightAuto extends OpMode {
                 signal = middle;
             }
         } else {
-            telemetry.addLine("will go middle Bc didn't find anything");
-            signal = middle;
+            telemetry.addLine("will go right Bc didn't find anything");
+            signal = right;
         }
         telemetry.update();
     }
@@ -435,6 +441,7 @@ public class rightAuto extends OpMode {
 
     public void start() {
         /* Update the telemetry */
+        timeSinceStart.reset();
         gripperRotationServoPosition=0.35;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         frontRollerServo.setPower(0.1);
@@ -465,8 +472,8 @@ public class rightAuto extends OpMode {
     public void loop() {
         if (Objects.equals(phase, "toCycle")) {
             if (state == 0) {
-                targetX = 0;
-                targetY = 542.75598018;
+                targetX=231;
+                targetY=494;
                 state += 1;
             } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
@@ -488,12 +495,13 @@ public class rightAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect2")){ //collect cone #2
             if (state != 0 && collecting == false) {
-                phase = "deposit 2";
+                phase = "deposit2";
                 state = 0;
             } else {
                 collecting = true;
-                collectX=485;
-                collectY=-113;
+                gripperRotationServoPosition=0.1;
+                collectX=401;
+                collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -504,12 +512,13 @@ public class rightAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect3")){ //collect cone #3
             if (state != 0 && collecting == false) {
-                phase = "deposit 3";
+                phase = "deposit3";
                 state = 0;
             } else {
                 collecting = true;
-                collectX=485;
-                collectY=-160;
+                gripperRotationServoPosition=0.1;
+                collectX=393;
+                collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
             if (state != 0 && depositing == false) {
@@ -520,12 +529,13 @@ public class rightAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect4")){ //collect cone #4
             if (state != 0 && collecting == false) {
-                phase = "deposit 4";
+                phase = "deposit4";
                 state = 0;
             } else {
                 collecting = true;
-                collectX=485;
-                collectY=-180;
+                gripperRotationServoPosition=0.1;
+                collectX=386;
+                collectY=-230;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
             if (state != 0 && depositing == false) {
@@ -536,12 +546,13 @@ public class rightAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect5")){ //collect cone #5
             if (state != 0 && collecting == false) {
-                phase = "deposit 5";
+                phase = "deposit5";
                 state = 0;
             } else {
                 collecting = true;
-                collectX=485;
-                collectY=-200;
+                gripperRotationServoPosition=0.1;
+                collectX=378;
+                collectY=-260;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
@@ -552,12 +563,13 @@ public class rightAuto extends OpMode {
             }
         } else if (Objects.equals(phase, "collect6")){ //collect cone #6
             if (state != 0 && collecting == false) {
-                phase = "deposit 6";
+                phase = "deposit6";
                 state = 0;
             } else {
                 collecting = true;
-                collectX=485;
-                collectY=-220;
+                gripperRotationServoPosition=0.1;
+                collectX=371;
+                collectY=-290;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
             if (state != 0 && depositing == false) {
@@ -568,39 +580,25 @@ public class rightAuto extends OpMode {
             }
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
-                targetX = 0;
-                targetY = 542.75598018;
+                targetX=288.43871245;
+                targetY=-350.67571868+300;
+                gripperRotationServoPosition=1;
+                alignmentBarServo.setPosition(0.35);
                 state += 1;
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
-                    state += 1;
-                }
-            } else if (state == 2) {
-                drive.followTrajectoryAsync(transition);
+                drive.followTrajectoryAsync(rightPark);
                 state+=1;
-            } else if (state == 4) {
-                drive.followTrajectoryAsync(leftPark);
-                state+=1;
-            } else if (state == 6) {
-                if (signal==left){
+            } else if (state == 3) {
+                if (signal==right){
                     state+=2;
                 } else if (signal==middle){
                     drive.followTrajectoryAsync(middlePark);
                     state+=1;
-                } else if (signal==right){
-                    drive.followTrajectoryAsync(rightPark);
+                } else if (signal==left){
+                    drive.followTrajectoryAsync(leftPark);
                     state+=1;
                 }
-            } else if (state == 8){
-                if (signal==left){
-                    drive.followTrajectoryAsync(leftParkFinal);
-                } else if (signal==middle){
-                    drive.followTrajectoryAsync(middleParkFinal);
-                } else if (signal==right){
-                    drive.followTrajectoryAsync(rightParkFinal);
-                }
-                state+=1;
-            } else if (state == 10) {
+            } else if (state == 5) {
                 phase = "finish";
                 state = 0;
             }
@@ -608,8 +606,8 @@ public class rightAuto extends OpMode {
 
         } else if (Objects.equals(phase, "finish")) {
             if (state == 0) {
-                targetX=308.43871245;
-                targetY=-300.67571868;
+                targetX=288.43871245;
+                targetY=-340.67571868;
                 gripperRotationServoPosition=1;
                 alignmentBarServo.setPosition(0.35);
                 state += 1;
@@ -625,50 +623,58 @@ public class rightAuto extends OpMode {
 
         if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
             if (state == 0) { //to above junction
-                targetX = -396;
-                targetY = 848;
-                state += 1;
+                if (timeSinceStart.milliseconds()>=40000){
+                    state=50;
+                    depositing = false;
+                } else {
+                    targetX = -360;
+                    targetY = 780;
+                    state += 1;
+                    alignmentBarServo.setPosition(0.35);
+                    timer.reset();
+                }
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                if (timer.milliseconds()>300){
+                    gripperRotationServoPosition=0.35;
+                }
+                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>1200)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
+                    gripperRotationServoPosition=0.35;
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 500) {//move down
-                    targetX = -398;
-                    targetY = 741;
-                    state+=1;
-                }
-            } else if (state == 3) {
-                if (timer.milliseconds() >= 1000) {//deposit
+                if (timer.milliseconds() >= 500) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
-                    retractAlignmentBar=5;
+                    retractAlignmentBar=6;
                     state += 1;
                 }
-            } else if (state == 4) {
-                if (timer.milliseconds() >= 1500) {
+            } else if (state ==3) {
+                if (timer.milliseconds() >= 700) {
                     frontRollerServo.setPower(0);
                     backRollerServo.setPower(0);
-                    targetX = -396;
-                    targetY = 848;
-                }
-                if (timer.milliseconds() >= 1700) {
                     depositing = false;
-                    state=0;
                 }
             }
 
         }
         if (collecting == true) { //collect macro if collecting is set to true it will caryout nesecary collecting steps then when finish sets colecting to false
             if (state == 0) { //to above junction
-                targetX = 486;
-                targetY = -48;
-                state += 1;
-                alignmentBarServo.setPosition(alignmentBarUpPos);
+                if (timeSinceStart.milliseconds()>=40000){
+                    state=50;
+                    collecting = false;
+                }
+                else {
+                    targetX = 431-15;
+                    targetY = -48;
+                    state += 1;
+                    alignmentBarServo.setPosition(alignmentBarUpPos);
+                    timer.reset();
+                }
+
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 50, twController.getPositionError(), 10)) {
+                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>=1000) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
@@ -677,16 +683,16 @@ public class rightAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 1000) {
-                    targetX = 486;
+                if (timer.milliseconds() >= 600) {
+                    targetX = 431-15;
                     targetY = -48;
                     frontRollerServo.setPower(0.1);
                     backRollerServo.setPower(0.1);
-                    state+=1;
+                    state += 1;
                 }
-                if (timer.milliseconds() >= 1300) {
+            } else if(state == 3){
+                if (timer.milliseconds() >= 700) {
                     collecting = false;
-                    state=0;
                 }
             }
 
@@ -695,11 +701,19 @@ public class rightAuto extends OpMode {
 
         telemetry.addData("currentFSMState", state);
         telemetry.addData("phase", phase);
+        telemetry.addData("depositing?", depositing);
+        telemetry.addData("collecting", collecting);
+        telemetry.addData("targetX", targetX);
+        telemetry.addData("targetY", targetY);
+        telemetry.addData("armTarget", armTarget);
+        telemetry.addData("armError", armController.getPositionError());
+        telemetry.addData("towerTarget", twTarget);
+        telemetry.addData("towerError", twController.getPositionError());
         drive.update();
 
 
         //inverse kinemetics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         double targetXLast = targetX;
         double targetYLast = targetY;
@@ -718,44 +732,49 @@ public class rightAuto extends OpMode {
         //tower controller
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
-        if (towerPid > towerMaxPower) {
-            towerPid = towerMaxPower;
-        }
-        if (towerPid < -towerMaxPower) {
-            towerPid = -towerMaxPower;
-        }
         double towerFf = Tf;
-
-
-        double towerPower = towerPid + towerFf;
-        if (!done) {
-            towerRight.setPower(towerPower);
-            towerLeft.setPower(towerPower);
-        } else {
-            towerRight.setPower(0);
-            towerLeft.setPower(0);
+        double towerFs=0;
+        if (twController.getPositionError()>towerTolerance){ //static friction code
+            towerFs=Ts;
+        } else if(twController.getPositionError()<-towerTolerance) {
+            towerFs = -Ts;
         }
-
+        double towerPower = towerPid + towerFs;
+        if (towerPower>towerMaxPower){
+            towerPower=towerMaxPower;
+        }
+        if (towerPower<-towerMaxPower){
+            towerPower=-towerMaxPower;
+        }
+        towerPower+=towerFf;
 
         //arm controller
         armController.setPID(Ap, Ai, Ad);
-
-
         double armPid = armController.calculate(armPos, armTarget);
-        if (armPid > armMaxPower) {
-            armPid = armMaxPower;
+        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
+        double armFs = 0;
+        if (armController.getPositionError()>armTolerance){
+            armFs=As;
+        } else if(armController.getPositionError()<-armTolerance) {
+            armFs=-As;
         }
-        if (armPid < -armMaxPower) {
-            armPid = -armMaxPower;
+        double armPower = armPid + armFs;
+        if (armPower>armMaxPower){
+            armPid=armMaxPower;
         }
-        double armFf = -Math.sin((armPos / ticksPerRadian) - 0.236) * Af;
-
-
-        double armPower = armPid + armFf;
-        if (!done) {
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
+        armPower+=armFf;
+        if (!done){
+            towerRight.setPower(towerPower);
+            towerLeft.setPower(towerPower);
             armMotor.setPower(armPower);
-        } else {
+        }
+        else{
             armMotor.setPower(0);
+            towerRight.setPower(0);
+            towerLeft.setPower(0);
         }
 
 

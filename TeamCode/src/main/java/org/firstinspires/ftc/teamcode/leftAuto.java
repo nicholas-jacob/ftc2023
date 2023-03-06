@@ -118,7 +118,7 @@ public class leftAuto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.65;
+    private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -151,7 +151,7 @@ public class leftAuto extends OpMode {
     int left = 1;
     int middle = 2;
     int right = 3;
-    int signal = 3;
+    int signal = 1;
 
 
     AprilTagDetection tagOfInterest = null;
@@ -307,7 +307,7 @@ public class leftAuto extends OpMode {
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 })
-                .lineToSplineHeading(new Pose2d(-59, -11.75, Math.toRadians(180)),
+                .lineToSplineHeading(new Pose2d(-61, -11.75, Math.toRadians(180)),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -341,7 +341,7 @@ public class leftAuto extends OpMode {
 
     public void init_loop() {
         //inverse kinematics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
@@ -426,8 +426,8 @@ public class leftAuto extends OpMode {
                 signal = middle;
             }
         } else {
-            telemetry.addLine("will go right Bc didn't find anything");
-            signal = right;
+            telemetry.addLine("will go left Bc didn't find anything");
+            signal = left;
         }
         telemetry.update();
     }
@@ -628,7 +628,7 @@ public class leftAuto extends OpMode {
                     depositing = false;
                 } else {
                     targetX = -360;
-                    targetY = 790;
+                    targetY = 780;
                     state += 1;
                     alignmentBarServo.setPosition(0.35);
                     timer.reset();
@@ -713,7 +713,7 @@ public class leftAuto extends OpMode {
 
 
         //inverse kinemetics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         double targetXLast = targetX;
         double targetYLast = targetY;
