@@ -101,7 +101,7 @@ public class rightAuto extends OpMode {
     public static double Af = 0.15, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
+    private final double ticksPerRadian = 1425.1 * (2.4) / (2 * Math.PI);
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
@@ -630,12 +630,12 @@ public class rightAuto extends OpMode {
                     targetX = -360;
                     targetY = 780;
                     state += 1;
-                    alignmentBarServo.setPosition(0.35);
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (timer.milliseconds()>300){
+                if (timer.milliseconds()>500){
                     gripperRotationServoPosition=0.35;
+                    alignmentBarServo.setPosition(0.35);
                 }
                 if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>1200)  {
                     state += 1;

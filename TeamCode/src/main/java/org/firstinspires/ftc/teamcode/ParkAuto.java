@@ -84,7 +84,7 @@ public class ParkAuto extends OpMode {
     public static double Af = 0.15, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
+    private final double ticksPerRadian = 1425.1 * (2.4) / (2 * Math.PI);;
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
