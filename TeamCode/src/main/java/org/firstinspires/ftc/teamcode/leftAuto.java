@@ -283,7 +283,7 @@ public class leftAuto extends OpMode {
 
 
 
-        startPose = new Pose2d(-36, -61.3125, Math.toRadians(90));
+        startPose = new Pose2d(-36 , -61.3125, Math.toRadians(90));
         cycle_positionVector = new Vector2d(-58, -6.5);
 
 
