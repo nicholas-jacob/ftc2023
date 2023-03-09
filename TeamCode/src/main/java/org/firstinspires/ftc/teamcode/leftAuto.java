@@ -116,6 +116,7 @@ public class leftAuto extends OpMode {
     private Servo alignmentBarServo;
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
+    private Servo wheelieBarServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.75;
@@ -203,6 +204,8 @@ public class leftAuto extends OpMode {
         backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
+        wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
+        wheelieBarServo.setPosition(0.25);
         gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
@@ -294,6 +297,7 @@ public class leftAuto extends OpMode {
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
+                    wheelieBarServo.setPosition(0);
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -302,6 +306,7 @@ public class leftAuto extends OpMode {
                 .build();
         leftPark = drive.trajectoryBuilder(cycle_position.end())
                 .addDisplacementMarker(() -> {
+                    wheelieBarServo.setPosition(0.55);
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);

@@ -68,6 +68,7 @@ public class TeleOp2023V3Auto extends OpMode {
     private Servo alignmentBarServo;
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
+    private Servo wheelieBarServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.75;
@@ -107,6 +108,8 @@ public class TeleOp2023V3Auto extends OpMode {
         backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
+        wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
+        wheelieBarServo.setPosition(0.55);
         gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);

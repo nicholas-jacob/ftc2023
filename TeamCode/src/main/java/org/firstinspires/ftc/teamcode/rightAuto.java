@@ -116,6 +116,7 @@ public class rightAuto extends OpMode {
     private Servo alignmentBarServo;
     private CRServo frontRollerServo;
     private CRServo backRollerServo;
+    private Servo wheelieBarServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.75;
@@ -174,6 +175,7 @@ public class rightAuto extends OpMode {
     Trajectory rightParkFinal=null;
     Trajectory cycle_position=null;
     Trajectory transition=null;
+    Pose2d preCyclePose=null;
 
 
 
@@ -203,6 +205,8 @@ public class rightAuto extends OpMode {
         backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
+        wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
+        wheelieBarServo.setPosition(0.25);
         gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
@@ -284,16 +288,18 @@ public class rightAuto extends OpMode {
 
 
         startPose = new Pose2d(36, -61.3125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(58, -6.5);
+        cycle_positionVector = new Vector2d(58.25, -7);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineTo(new Vector2d(36,-24))
-                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-12.0362))//og angle is 194.0362
+                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-15.0362))//og angle is 194.0362
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90-14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
+                    wheelieBarServo.setPosition(0);
+                    preCyclePose=drive.getPoseEstimate();
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -302,6 +308,7 @@ public class rightAuto extends OpMode {
                 .build();
         rightPark = drive.trajectoryBuilder(cycle_position.end())
                 .addDisplacementMarker(() -> {
+                    wheelieBarServo.setPosition(0.55);
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -575,6 +582,7 @@ public class rightAuto extends OpMode {
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
+                wheelieBarServo.setPosition(0.55);
             } else {
                 depositing = true;
             }
@@ -586,6 +594,7 @@ public class rightAuto extends OpMode {
                 alignmentBarServo.setPosition(0.35);
                 state += 1;
             } else if (state == 1) {
+                drive.setPoseEstimate(preCyclePose);
                 drive.followTrajectoryAsync(rightPark);
                 state+=1;
             } else if (state == 3) {
@@ -627,13 +636,13 @@ public class rightAuto extends OpMode {
                     state=50;
                     depositing = false;
                 } else {
-                    targetX = -360;
+                    targetX = -380;
                     targetY = 780;
                     state += 1;
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (timer.milliseconds()>500){
+                if (timer.milliseconds()>300){
                     gripperRotationServoPosition=0.35;
                     alignmentBarServo.setPosition(0.35);
                 }
