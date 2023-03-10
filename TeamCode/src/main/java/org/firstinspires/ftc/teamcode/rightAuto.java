@@ -206,7 +206,7 @@ public class rightAuto extends OpMode {
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
-        wheelieBarServo.setPosition(0.25);
+        wheelieBarServo.setPosition(0.35);
         gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
@@ -288,13 +288,13 @@ public class rightAuto extends OpMode {
 
 
         startPose = new Pose2d(36, -61.3125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(58.25, -7);
+        cycle_positionVector = new Vector2d(58.25, -7.25);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineTo(new Vector2d(36,-24))
-                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-15.0362))//og angle is 194.0362
+                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-16.5362))//og angle is 194.0362
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90-14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
@@ -319,12 +319,10 @@ public class rightAuto extends OpMode {
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
-                    targetX=288.43871245;
-                    targetY=-350.67571868;
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(rightPark.end())
-                .lineToConstantHeading(new Vector2d(35.5, -11.75),
+                .lineToConstantHeading(new Vector2d(36.5, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -483,7 +481,7 @@ public class rightAuto extends OpMode {
                 targetY=494;
                 state += 1;
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
+                if (withinTolerance(armController.getPositionError(), 400, twController.getPositionError(), 80)) {
                     state += 1;
                 }
             } else if (state == 2) {
@@ -507,7 +505,7 @@ public class rightAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.1;
-                collectX=401;
+                collectX=401+20;
                 collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
@@ -524,7 +522,7 @@ public class rightAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.1;
-                collectX=393;
+                collectX=393+20;
                 collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
@@ -540,9 +538,11 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
-                collectX=386;
-                collectY=-230;
+                gripperRotationServoPosition=0.13;
+                collectX=378+10;
+                collectY=-260;
+                //collectX=386+15;
+                //collectY=-230;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
             if (state != 0 && depositing == false) {
@@ -557,9 +557,11 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
-                collectX=378;
-                collectY=-260;
+                gripperRotationServoPosition=0.16;
+                collectX=371+10;
+                collectY=-290;
+                //collectX=378+10;
+                //collectY=-260;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
@@ -574,9 +576,9 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
-                collectX=371;
-                collectY=-290;
+                gripperRotationServoPosition=0.2;
+                collectX=364+10;
+                collectY=-320;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
             if (state != 0 && depositing == false) {
@@ -588,7 +590,7 @@ public class rightAuto extends OpMode {
             }
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
-                targetX=288.43871245;
+                targetX=268.43871245;
                 targetY=-350.67571868+300;
                 gripperRotationServoPosition=1;
                 alignmentBarServo.setPosition(0.35);
@@ -615,13 +617,13 @@ public class rightAuto extends OpMode {
 
         } else if (Objects.equals(phase, "finish")) {
             if (state == 0) {
-                targetX=288.43871245;
+                targetX=268.43871245;
                 targetY=-340.67571868;
                 gripperRotationServoPosition=1;
                 alignmentBarServo.setPosition(0.35);
                 state += 1;
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)) {
+                if (withinTolerance(armController.getPositionError(), 400, twController.getPositionError(), 40)) {
                     state += 1;
                 }
             } else if (state == 2) {
@@ -637,7 +639,7 @@ public class rightAuto extends OpMode {
                     depositing = false;
                 } else {
                     targetX = -380;
-                    targetY = 780;
+                    targetY = 790-5;
                     state += 1;
                     timer.reset();
                 }
@@ -646,7 +648,7 @@ public class rightAuto extends OpMode {
                     gripperRotationServoPosition=0.35;
                     alignmentBarServo.setPosition(0.35);
                 }
-                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>1200)  {
+                if (withinTolerance(armController.getPositionError(), 38, twController.getPositionError(), 12) || timer.milliseconds()>1200)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     gripperRotationServoPosition=0.35;
@@ -656,11 +658,11 @@ public class rightAuto extends OpMode {
                 if (timer.milliseconds() >= 500) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
-                    retractAlignmentBar=6;
+                    retractAlignmentBar=3;
                     state += 1;
                 }
             } else if (state ==3) {
-                if (timer.milliseconds() >= 700) {
+                if (timer.milliseconds() >= 740) {
                     frontRollerServo.setPower(0);
                     backRollerServo.setPower(0);
                     depositing = false;
@@ -683,7 +685,7 @@ public class rightAuto extends OpMode {
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 30, twController.getPositionError(), 10) || timer.milliseconds()>=1000) {
+                if (withinTolerance(armController.getPositionError(), 38, twController.getPositionError(), 12) || timer.milliseconds()>=800) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
@@ -692,7 +694,7 @@ public class rightAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 600) {
+                if (timer.milliseconds() >= 500) {
                     targetX = 431-15;
                     targetY = -48;
                     frontRollerServo.setPower(0.1);

@@ -276,14 +276,14 @@ public class TeleOp2023V3Auto extends OpMode {
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=409.7;
-            targetY=112;
+            targetY=117;
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.35;
         }
         //midJunction
         if (gamepad2.dpad_right){
             targetX=-299;
-            targetY=518;
+            targetY=528;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
 
@@ -291,21 +291,21 @@ public class TeleOp2023V3Auto extends OpMode {
         //highJunction
         if (gamepad2.dpad_up){
             targetX=18;
-            targetY=671;
+            targetY=681;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }
         //highCycle
         if (gamepad2.left_bumper){
             targetX=-137;
-            targetY=716;
+            targetY=726;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
             targetX = -356;
-            targetY = 798;
+            targetY = 808;
             alignmentBarServo.setPosition(0.4);
             gripperRotationServoPosition=0.35;
         }
