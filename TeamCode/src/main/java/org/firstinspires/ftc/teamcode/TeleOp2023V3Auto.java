@@ -205,7 +205,7 @@ public class TeleOp2023V3Auto extends OpMode {
     }
 
     public void start() {
-        gripperRotationServoPosition=0.35;
+        gripperRotationServoPosition=0.25;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         targetX=231;
         targetY=494;
@@ -257,35 +257,35 @@ public class TeleOp2023V3Auto extends OpMode {
             targetX=480;
             targetY=-202;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.2;
+            gripperRotationServoPosition=0.1;
         }
         //intake stack
         if (gamepad2.right_trigger>=0.5){
             targetX = 486;
             targetY = -48;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.2;
+            gripperRotationServoPosition=0.1;
         }
         //groundJunction
         if (gamepad2.dpad_down){
             targetX=-359;
             targetY=-17;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
         }
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=409.7;
             targetY=117;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
         }
         //midJunction
         if (gamepad2.dpad_right){
             targetX=-299;
             targetY=528;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
 
         }
         //highJunction
@@ -293,21 +293,21 @@ public class TeleOp2023V3Auto extends OpMode {
             targetX=18;
             targetY=681;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
         }
         //highCycle
         if (gamepad2.left_bumper){
             targetX=-137;
             targetY=726;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
             targetX = -356;
             targetY = 808;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.35;
+            gripperRotationServoPosition=0.25;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;

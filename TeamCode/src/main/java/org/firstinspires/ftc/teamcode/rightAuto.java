@@ -121,7 +121,7 @@ public class rightAuto extends OpMode {
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
-    public static double gripperRotationServoPosition=1;
+    public static double gripperRotationServoPosition=0.96;
 
 
 
@@ -351,7 +351,7 @@ public class rightAuto extends OpMode {
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
         //set targets
-        targetX=288.43871245;
+        targetX=288.43871245-10;
         targetY=-340.67571868;
 
 
@@ -372,8 +372,8 @@ public class rightAuto extends OpMode {
 
 
         double towerPower = towerPid + towerFf;
-        towerRight.setPower(towerPower);
-        towerLeft.setPower(towerPower);
+        towerRight.setPower(towerPower*0);
+        towerLeft.setPower(towerPower*0);
 
 
         //arm controller
@@ -385,7 +385,7 @@ public class rightAuto extends OpMode {
 
 
         double armPower = armPid + armFf;
-        armMotor.setPower(armPower);
+        armMotor.setPower(armPower*0);
 
 
         //set servos
@@ -447,7 +447,7 @@ public class rightAuto extends OpMode {
     public void start() {
         /* Update the telemetry */
         timeSinceStart.reset();
-        gripperRotationServoPosition=0.35;
+        gripperRotationServoPosition=0.25;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         frontRollerServo.setPower(0.1);
         backRollerServo.setPower(0.1);
@@ -504,7 +504,7 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
+                gripperRotationServoPosition=0.0;
                 collectX=401+20;
                 collectY=-170;
             }
@@ -521,7 +521,7 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
+                gripperRotationServoPosition=0.0;
                 collectX=393+20;
                 collectY=-200;
             }
@@ -538,7 +538,7 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.13;
+                gripperRotationServoPosition=0.03;
                 collectX=378+10;
                 collectY=-260;
                 //collectX=386+15;
@@ -557,7 +557,7 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.16;
+                gripperRotationServoPosition=0.06;
                 collectX=371+10;
                 collectY=-290;
                 //collectX=378+10;
@@ -576,7 +576,7 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.2;
+                gripperRotationServoPosition=0.1;
                 collectX=364+10;
                 collectY=-320;
             }
@@ -645,13 +645,13 @@ public class rightAuto extends OpMode {
                 }
             } else if (state == 1) {
                 if (timer.milliseconds()>300){
-                    gripperRotationServoPosition=0.35;
+                    gripperRotationServoPosition=0.25;
                     alignmentBarServo.setPosition(0.35);
                 }
                 if (withinTolerance(armController.getPositionError(), 38, twController.getPositionError(), 12) || timer.milliseconds()>1200)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
-                    gripperRotationServoPosition=0.35;
+                    gripperRotationServoPosition=0.25;
                     timer.reset();
                 }
             } else if (state == 2) {
