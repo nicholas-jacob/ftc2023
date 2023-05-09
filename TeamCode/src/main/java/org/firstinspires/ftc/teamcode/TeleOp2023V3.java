@@ -75,6 +75,7 @@ public class TeleOp2023V3 extends OpMode {
     private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=0.96;
+    public static double gripperOpenPos=0.5;
 
 
 
@@ -318,19 +319,15 @@ public class TeleOp2023V3 extends OpMode {
 
         if (gamepad2.a){
             frontRollerServo.setPower(1);
-            backRollerServo.setPower(1);
+            backRollerServo.setPower(-1);
             alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         else{
-            if (gamepad2.b){
-                frontRollerServo.setPower(-1);
-                backRollerServo.setPower(-1);
-                retractAlignmentBar=3;
-            }
-            else{
-                frontRollerServo.setPower(0.1);
-                backRollerServo.setPower(0.1);
+            if (gamepad2.b) {
+                frontRollerServo.setPower(gripperOpenPos);
+                backRollerServo.setPower(-gripperOpenPos);
+                retractAlignmentBar = 3;
             }
         }
         if (gamepad2.x){
