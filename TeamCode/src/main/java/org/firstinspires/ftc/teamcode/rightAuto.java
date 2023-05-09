@@ -206,7 +206,7 @@ public class rightAuto extends OpMode {
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
-        wheelieBarServo.setPosition(0.35);
+        wheelieBarServo.setPosition(0.55);
         gripperRotationServoPosition=1;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
@@ -505,8 +505,10 @@ public class rightAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.0;
-                collectX=401+20;
-                collectY=-170;
+                collectX=393+20;
+                collectY=-185;
+                //collectX=401+20;
+                //collectY=-170;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -522,8 +524,10 @@ public class rightAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.0;
-                collectX=393+20;
-                collectY=-200;
+                collectX=386+15;
+                collectY=-215;
+                //collectX=393+20;
+                //collectY=-200;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
             if (state != 0 && depositing == false) {
@@ -539,8 +543,8 @@ public class rightAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.03;
-                collectX=378+10;
-                collectY=-260;
+                collectX=378+20;
+                collectY=-245;
                 //collectX=386+15;
                 //collectY=-230;
             }
@@ -557,9 +561,9 @@ public class rightAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.06;
-                collectX=371+10;
-                collectY=-290;
+                gripperRotationServoPosition=0.03;
+                collectX=371+20;
+                collectY=-265;
                 //collectX=378+10;
                 //collectY=-260;
             }
@@ -655,10 +659,10 @@ public class rightAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 500) {//deposit
+                if (timer.milliseconds() >= 400) {//deposit
                     frontRollerServo.setPower(-1);
                     backRollerServo.setPower(-1);
-                    retractAlignmentBar=3;
+                    retractAlignmentBar=6;
                     state += 1;
                 }
             } else if (state ==3) {
