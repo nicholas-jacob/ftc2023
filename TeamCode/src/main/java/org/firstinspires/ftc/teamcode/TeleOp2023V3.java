@@ -39,11 +39,11 @@ public class TeleOp2023V3 extends OpMode {
     private boolean foc=true;
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.001;
-    public static double Tf = 0.04, Ts=0, towerTolerance=8;//0.27;
+    public static double Tp=0.02, Ti = 0, Td = 0.001;
+    public static double Tf = 0.00, Ts=0, towerTolerance=8;//0.27;
 
     public static int twTarget = 0;
-    private final double ticksPerMM = 1.503876;
+    private final double ticksPerMM = 2.02696328861;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
 
@@ -52,11 +52,11 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.005, Ai = 0, Ad = 0.0005;
-    public static double Af = 0.15, As = 0, armTolerance= 50;
+    public static double Ap = 0.001, Ai = 0, Ad = 0.0000;
+    public static double Af = 0, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 1425.1 * (2.4) / (2 * Math.PI);
+    private final double ticksPerRadian = 8192 / (2 * Math.PI);
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
@@ -67,15 +67,19 @@ public class TeleOp2023V3 extends OpMode {
     //GR
     private Servo gripperRotationServo;
     private Servo alignmentBarServo;
-    private CRServo frontRollerServo;
-    private CRServo backRollerServo;
+    private Servo leftClaw;
+    private Servo rightClaw;
     private Servo wheelieBarServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
     private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
-    public static double gripperRotationServoPosition=0.96;
-    public static double gripperOpenPos=0.5;
+    public static double gripperRotationServoPosition=0;
+    //in distance away from 0.5;
+    public static double gripperOpenPos=0.2;
+    public static double gripperHalfOpenPos=0.2;
+    public static double gripperClosePos=0.2;
+    public String gripperState="open";
 
 
 
@@ -107,13 +111,13 @@ public class TeleOp2023V3 extends OpMode {
         backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
         //setUpServos
-        frontRollerServo = hardwareMap.get(CRServo.class, "frontRollerServo");
-        backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
+        leftClaw = hardwareMap.get(Servo.class, "leftClaw");
+        rightClaw = hardwareMap.get(Servo.class, "rightClaw");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
         wheelieBarServo.setPosition(0.55);
-        gripperRotationServoPosition=1;
+        gripperRotationServoPosition=0;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
@@ -209,7 +213,7 @@ public class TeleOp2023V3 extends OpMode {
     }
 
     public void start() {
-        gripperRotationServoPosition=0.25;
+        gripperRotationServoPosition=0;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         targetX=231;
         targetY=494;
@@ -261,35 +265,39 @@ public class TeleOp2023V3 extends OpMode {
             targetX=480;
             targetY=-202;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.1;
+            gripperRotationServoPosition=0;
+            gripperState="open";
         }
         //intake stack
         if (gamepad2.right_trigger>=0.5){
             targetX = 486;
             targetY = -48;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.1;
+            gripperRotationServoPosition=0;
+            gripperState="open";
         }
         //groundJunction
         if (gamepad2.dpad_down){
             targetX=-359;
             targetY=-17;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
+            leftClaw.setPosition(gripperClosePos);
+            rightClaw.setPosition(-gripperClosePos);
         }
         //lowJunction
         if (gamepad2.dpad_left){
             targetX=409.7;
             targetY=117;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
         }
         //midJunction
         if (gamepad2.dpad_right){
             targetX=-299;
             targetY=528;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
 
         }
         //highJunction
@@ -297,39 +305,54 @@ public class TeleOp2023V3 extends OpMode {
             targetX=18;
             targetY=681;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
         }
         //highCycle
         if (gamepad2.left_bumper){
             targetX=-137;
             targetY=726;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
             targetX = -356;
             targetY = 808;
             alignmentBarServo.setPosition(0.4);
-            gripperRotationServoPosition=0.25;
+            gripperRotationServoPosition=0;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;
         targetY-=(gamepad2.left_stick_y)*7;
 
         if (gamepad2.a){
-            frontRollerServo.setPower(1);
-            backRollerServo.setPower(-1);
+            gripperState="close";
             alignmentBarServo.setPosition(alignmentBarUpPos);
 
         }
         else{
             if (gamepad2.b) {
-                frontRollerServo.setPower(gripperOpenPos);
-                backRollerServo.setPower(-gripperOpenPos);
+                gripperState="open";
                 retractAlignmentBar = 3;
             }
         }
+
+        if (gripperState=="open") {
+            if (armPos>2000) {
+                leftClaw.setPosition(0.5+gripperOpenPos);
+                rightClaw.setPosition(0.5-gripperOpenPos);
+                telemetry.addData("gripperState", 1);
+            } else{
+                leftClaw.setPosition(0.5+gripperHalfOpenPos);
+                rightClaw.setPosition(0.5-gripperHalfOpenPos);
+                telemetry.addData("gripperState", 2);
+            }
+        } else{
+            leftClaw.setPosition(0.5+gripperClosePos);
+            rightClaw.setPosition(0.5-gripperClosePos);
+            telemetry.addData("gripperState", 3);
+        }
+
         if (gamepad2.x){
             alignmentBarServo.setPosition(alignmentBarDownPos);
         }
