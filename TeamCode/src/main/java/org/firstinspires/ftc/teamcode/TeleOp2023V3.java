@@ -57,6 +57,7 @@ public class TeleOp2023V3 extends OpMode {
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 8192 / (2 * Math.PI);
+    private static int armOffset=0;
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
@@ -70,11 +71,14 @@ public class TeleOp2023V3 extends OpMode {
     private Servo leftClaw;
     private Servo rightClaw;
     private Servo wheelieBarServo;
+    public static double wheelieBarPosition=.55;
     private int retractAlignmentBar = 0;
-    private final double alignmentBarDownPos = 0.75;
-    private final double alignmentBarUpPos = 0.2;
+    public static int retractAlignmentBarDelay=5;
+    public static double alignmentBarDownPos = 0.75;
+    public static double alignmentBarMidPos = .3;
+    public static double alignmentBarUpPos = 0.2;
     private InverseKinematics inverseKinematics;
-    public static double gripperRotationServoPosition=0;
+    public static double gripperRotationServoPosition=.5;
     //in distance away from 0.5;
     public static double gripperOpenPos=0.2;
     public static double gripperHalfOpenPos=0.02;
@@ -118,8 +122,8 @@ public class TeleOp2023V3 extends OpMode {
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
-        wheelieBarServo.setPosition(0.55);
-        gripperRotationServoPosition=0;
+        wheelieBarServo.setPosition(wheelieBarPosition);
+        gripperRotationServoPosition=0.5;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
@@ -162,7 +166,7 @@ public class TeleOp2023V3 extends OpMode {
     public void init_loop() {
         //inverse kinematics
         int towerPos = towerLeft.getCurrentPosition();
-        int armPos = armMotor.getCurrentPosition();
+        int armPos = armMotor.getCurrentPosition()+armOffset;
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
         //set targets
@@ -203,7 +207,7 @@ public class TeleOp2023V3 extends OpMode {
 
             //set servos
             gripperRotationServo.setPosition(gripperRotationServoPosition);
-            alignmentBarServo.setPosition(0.35);
+            alignmentBarServo.setPosition(alignmentBarUpPos);
             telemetry.addData("armTarget", armTarget);
             telemetry.addData("armPos", armPos);
             telemetry.addData("towerTarget", twTarget);
@@ -215,7 +219,7 @@ public class TeleOp2023V3 extends OpMode {
     }
 
     public void start() {
-        gripperRotationServoPosition=0;
+        gripperRotationServoPosition=0.5;
         alignmentBarServo.setPosition(alignmentBarUpPos);
         targetX=231;
         targetY=494;
@@ -257,7 +261,7 @@ public class TeleOp2023V3 extends OpMode {
         }
         // finite state machine goes here
         int towerPos = towerLeft.getCurrentPosition();
-        int armPos = armMotor.getCurrentPosition();
+        int armPos = armMotor.getCurrentPosition()+armOffset;
         double targetXLast=targetX;
         double targetYLast=targetY;
 
@@ -267,7 +271,7 @@ public class TeleOp2023V3 extends OpMode {
             targetX=330;
             targetY=-306;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0;
+            gripperRotationServoPosition=0.5;
             gripperState="open";
         }
         //intake stack
@@ -275,7 +279,7 @@ public class TeleOp2023V3 extends OpMode {
             targetX = 486;
             targetY = -48;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0;
+            gripperRotationServoPosition=0.5;
             gripperState="open";
         }
         //groundJunction
@@ -283,7 +287,7 @@ public class TeleOp2023V3 extends OpMode {
             targetX=-359;
             targetY=-17;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0;
+            gripperRotationServoPosition=0.5;
             leftClaw.setPosition(gripperClosePos);
             rightClaw.setPosition(-gripperClosePos);
         }
@@ -292,36 +296,36 @@ public class TeleOp2023V3 extends OpMode {
             targetX=463;
             targetY=63;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0;
+            gripperRotationServoPosition=0.5;
         }
         //midJunction
         if (gamepad2.dpad_right){
             targetX=-318;
             targetY=504;
-            alignmentBarServo.setPosition(0.3);
-            gripperRotationServoPosition=0;
+            alignmentBarServo.setPosition(alignmentBarMidPos);
+            gripperRotationServoPosition=0.5;
 
         }
         //highJunction
         if (gamepad2.dpad_up){
             targetX=-119;
             targetY=687;
-            alignmentBarServo.setPosition(0.3);
-            gripperRotationServoPosition=0;
+            alignmentBarServo.setPosition(alignmentBarMidPos);
+            gripperRotationServoPosition=0.5;
         }
         //highCycle
         if (gamepad2.left_bumper){
-            targetX=231;
-            targetY=494;
-            alignmentBarServo.setPosition(0.3);
-            gripperRotationServoPosition=0;
+            targetX=-119;
+            targetY=687;
+            alignmentBarServo.setPosition(alignmentBarMidPos);
+            gripperRotationServoPosition=0.4;
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
-            targetX=231;
-            targetY=494;
-            alignmentBarServo.setPosition(0.3);
-            gripperRotationServoPosition=0;
+            targetX=-119;
+            targetY=687;
+            alignmentBarServo.setPosition(alignmentBarMidPos);
+            gripperRotationServoPosition=0.6;
         }
 
         targetX+=(gamepad2.left_stick_x)*7;
@@ -329,7 +333,7 @@ public class TeleOp2023V3 extends OpMode {
 
         if (gamepad2.b) {
                 gripperState="open";
-                retractAlignmentBar = 3;
+                retractAlignmentBar = 5;
         }
 
         if (gripperState=="open") {
@@ -378,6 +382,8 @@ public class TeleOp2023V3 extends OpMode {
         gripperRotationServo.setPosition(gripperRotationServoPosition);
 
 
+        //set wheelie bar
+        wheelieBarServo.setPosition(wheelieBarPosition);
 
 
 
@@ -440,12 +446,12 @@ public class TeleOp2023V3 extends OpMode {
 
         //uncomment for arm tuning
         telemetry.addData("armPos", armPos);
-        telemetry.addData("armTarget", armTarget);
+        telemetry.addData("armError", armTarget-armPos);
         telemetry.addData("armPower", armPower);
 
         //uncomment for tower tuning
         telemetry.addData("twPos", towerPos);
-        telemetry.addData("towerTarget", twTarget);
+        telemetry.addData("towerTarget", twTarget-towerPos);
         telemetry.addData("towerPower", towerPower);
 
         telemetry.addData("TargetX", targetX);
