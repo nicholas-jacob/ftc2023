@@ -40,7 +40,7 @@ public class TeleOp2023V3 extends OpMode {
     //TW
     private PIDController twController;
     public static double Tp=0.014, Ti = 0, Td = 0.00055;
-    public static double Tf = 0.175, Ts=0.175, towerTolerance=6;//0.27;
+    public static double Tf = 0.175, Ts=0.175, towerTolerance=4;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 2.02696328861;
