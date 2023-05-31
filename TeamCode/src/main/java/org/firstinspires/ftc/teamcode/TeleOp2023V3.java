@@ -39,8 +39,8 @@ public class TeleOp2023V3 extends OpMode {
     private boolean foc=true;
     //TW
     private PIDController twController;
-    public static double Tp=0.012, Ti = 0, Td = 0.0004;
-    public static double Tf = 0.08, Ts=0, towerTolerance=8;//0.27;
+    public static double Tp=0.014, Ti = 0, Td = 0.00055;
+    public static double Tf = 0.175, Ts=0.175, towerTolerance=6;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 2.02696328861;
@@ -53,11 +53,11 @@ public class TeleOp2023V3 extends OpMode {
     private PIDController armController;
 
     public static double Ap = 0.0015, Ai = 0, Ad = 0.00006;
-    public static double Af = 0.13, As = 0, armTolerance= 50;
+    public static double Af = 0.07, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 8192 / (2 * Math.PI);
-    private static int armOffset=0;
+    private static int armOffset=3025;
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
@@ -71,7 +71,7 @@ public class TeleOp2023V3 extends OpMode {
     private Servo leftClaw;
     private Servo rightClaw;
     private Servo wheelieBarServo;
-    public static double wheelieBarPosition=.55;
+    public static double wheelieBarPosition=.56;
     private int retractAlignmentBar = 0;
     public static int retractAlignmentBarDelay=5;
     public static double alignmentBarDownPos = 0.75;
@@ -333,7 +333,7 @@ public class TeleOp2023V3 extends OpMode {
 
         if (gamepad2.b) {
                 gripperState="open";
-                retractAlignmentBar = 5;
+                retractAlignmentBar = retractAlignmentBarDelay;
         }
 
         if (gripperState=="open") {
