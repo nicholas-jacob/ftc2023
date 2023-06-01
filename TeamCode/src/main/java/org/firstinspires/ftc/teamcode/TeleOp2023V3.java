@@ -165,7 +165,7 @@ public class TeleOp2023V3 extends OpMode {
 
     public void init_loop() {
         //inverse kinematics
-        int towerPos = towerLeft.getCurrentPosition();
+        int towerPos = (int)Math.round((towerLeft.getCurrentPosition()+towerRight.getCurrentPosition())/2);
         int armPos = armMotor.getCurrentPosition()+armOffset;
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
@@ -260,7 +260,7 @@ public class TeleOp2023V3 extends OpMode {
             mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         }
         // finite state machine goes here
-        int towerPos = towerLeft.getCurrentPosition();
+        int towerPos = (int)Math.round((towerLeft.getCurrentPosition()+towerRight.getCurrentPosition())/2);
         int armPos = armMotor.getCurrentPosition()+armOffset;
         double targetXLast=targetX;
         double targetYLast=targetY;
