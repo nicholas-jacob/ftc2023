@@ -40,7 +40,7 @@ public class TeleOp2023V3 extends OpMode {
     //TW
     private PIDController twController;
     public static double Tp=0.014, Ti = 0, Td = 0.00055;
-    public static double Tf = 0.175, Ts=0.175, towerTolerance=4;//0.27;
+    public static double Tf = 0.175, Ts=0.175, towerTolerance=6;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 2.02696328861;
@@ -52,8 +52,8 @@ public class TeleOp2023V3 extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.0015, Ai = 0, Ad = 0.00006;
-    public static double Af = 0.07, As = 0, armTolerance= 50;
+    public static double Ap = 0.002, Ai = 0, Ad = 0.00013;
+    public static double Af = 0.11, As = 0, armTolerance= 6;
 
     public static int armTarget = 0;
     private final double ticksPerRadian = 8192 / (2 * Math.PI);
@@ -296,7 +296,7 @@ public class TeleOp2023V3 extends OpMode {
             targetX=463;
             targetY=63;
             alignmentBarServo.setPosition(alignmentBarUpPos);
-            gripperRotationServoPosition=0.5;
+            gripperRotationServoPosition=0.25;
         }
         //midJunction
         if (gamepad2.dpad_right){
@@ -313,12 +313,12 @@ public class TeleOp2023V3 extends OpMode {
             alignmentBarServo.setPosition(alignmentBarMidPos);
             gripperRotationServoPosition=0.5;
         }
-        //highCycle
+        //travelPos
         if (gamepad2.left_bumper){
-            targetX=-119;
-            targetY=687;
+            targetX=231;
+            targetY=515;
             alignmentBarServo.setPosition(alignmentBarMidPos);
-            gripperRotationServoPosition=0.4;
+            gripperRotationServoPosition=0.5;
         }
         //highStack
         if (gamepad2.left_trigger>0.5){
