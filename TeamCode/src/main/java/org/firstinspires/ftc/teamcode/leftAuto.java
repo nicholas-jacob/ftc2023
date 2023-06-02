@@ -85,11 +85,11 @@ public class leftAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.001;
-    public static double Tf = 0.04, Ts=0, towerTolerance=8;//0.27;
+    public static double Tp=0.014, Ti = 0, Td = 0.00055;
+    public static double Tf = 0.175, Ts=0.175, towerTolerance=6;//0.27;
 
     public static int twTarget = 0;
-    private final double ticksPerMM = 1.503876;
+    private final double ticksPerMM = 2.02696328861;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
 
@@ -98,32 +98,41 @@ public class leftAuto extends OpMode {
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.005, Ai = 0, Ad = 0.0006;
-    public static double Af = 0.15, As = 0, armTolerance= 50;
+    public static double Ap = 0.002, Ai = 0, Ad = 0.00013;
+    public static double Af = 0.11, As = 0, armTolerance= 6;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 1425.1 * (2.4) / (2 * Math.PI);
+    private final double ticksPerRadian = 8192 / (2 * Math.PI);
+    private static int armOffset=3025;
     private DcMotorEx armMotor;
 
     public static double armMaxPower = 1.5;
 
 
+
     private double targetX=0;
     private double targetY=0;
-
 
     //GR
     private Servo gripperRotationServo;
     private Servo alignmentBarServo;
-    private CRServo frontRollerServo;
-    private CRServo backRollerServo;
+    private Servo leftClaw;
+    private Servo rightClaw;
     private Servo wheelieBarServo;
+    public static double wheelieBarPosition=.56;
     private int retractAlignmentBar = 0;
-    private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.75;
+    public static int retractAlignmentBarDelay=3;
+    public static double alignmentBarDownPos = 0.8;
+    public static double alignmentBarMidPos = 0.35;
+    public static double alignmentBarUpPos = 0.05;
     private InverseKinematics inverseKinematics;
-    public static double gripperRotationServoPosition=0.96;
-
+    public static double gripperRotationServoPosition=0.5;
+    public static double gripperOpenPos=0.2;
+    public static double gripperHalfOpenPos=0.03;
+    public static double gripperContainmentpos=0.06;
+    public static double gripperClosePos=-0.07;
+    public static double gripperCloseTight=-.15;
+    public String gripperState="open";
 
 
 
@@ -202,13 +211,13 @@ public class leftAuto extends OpMode {
 
 
         //setUpServos
-        frontRollerServo = hardwareMap.get(CRServo.class, "frontRollerServo");
-        backRollerServo = hardwareMap.get(CRServo.class, "backRollerServo");
+        leftClaw = hardwareMap.get(Servo.class, "leftClaw");
+        rightClaw = hardwareMap.get(Servo.class, "rightClaw");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
         gripperRotationServo = hardwareMap.get(Servo.class, "gripperRotationServo");
         wheelieBarServo = hardwareMap.get(Servo.class, "wheelieBarServo");
-        wheelieBarServo.setPosition(0.55);
-        gripperRotationServoPosition=1;
+        wheelieBarServo.setPosition(wheelieBarPosition);
+        gripperRotationServoPosition=0.5;
         //setUp tower
         twController = new PIDController(Tp, Ti, Td);
         towerRight = hardwareMap.get(DcMotorEx.class, "towerRight");
@@ -219,6 +228,9 @@ public class leftAuto extends OpMode {
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
         towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+
+
         //setUp arm
         armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
@@ -299,7 +311,8 @@ public class leftAuto extends OpMode {
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
-                    wheelieBarServo.setPosition(0);
+                    wheelieBarPosition=0.03;
+                    wheelieBarServo.setPosition(wheelieBarPosition);
                     preCyclePose=drive.getPoseEstimate();
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -309,7 +322,8 @@ public class leftAuto extends OpMode {
                 .build();
         leftPark = drive.trajectoryBuilder(cycle_position.end())
                 .addDisplacementMarker(() -> {
-                    wheelieBarServo.setPosition(0.55);
+                    wheelieBarPosition=0.56;
+                    wheelieBarServo.setPosition(wheelieBarPosition);
                     drive.rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -346,56 +360,15 @@ public class leftAuto extends OpMode {
 
 
     public void init_loop() {
-        //inverse kinematics
-        int towerPos = towerLeft.getCurrentPosition();
-        int armPos = armMotor.getCurrentPosition();
-        twController.setPID(Tp, Ti, Td);
-        armController.setPID(Ap, Ai, Ad);
-        //set targets
-        targetX=288.43871245;
-        targetY=-340.67571868;
-
-
-        //calculate with invserse kinematics here
-        int armTargetLast=armTarget;
-        int twTargetLast=twTarget;
-        if (inverseKinematics.calculate(targetX, targetY, armPos, towerPos)){
-            armTarget=inverseKinematics.armTarget;
-            twTarget=inverseKinematics.towerTarget;
-        }
-
-
-        //tower controller
-
-
-        double towerPid = twController.calculate(towerPos, twTarget);
-        double towerFf = Tf;
-
-
-        double towerPower = towerPid + towerFf;
-        towerRight.setPower(towerPower*0);
-        towerLeft.setPower(towerPower*0);
-
-
-        //arm controller
-        armController.setPID(Ap, Ai, Ad);
-
-
-        double armPid = armController.calculate(armPos, armTarget);
-        double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
-
-
-        double armPower = armPid + armFf;
-        armMotor.setPower(armPower*0);
-
+        armMotor.setPower(0);
+        towerRight.setPower(0);
+        towerLeft.setPower(0);
 
         //set servos
         gripperRotationServo.setPosition(gripperRotationServoPosition);
-        alignmentBarServo.setPosition(0.35);
-
+        alignmentBarServo.setPosition(alignmentBarUpPos);
 
         telemetry.update();
-
 
 
 
@@ -448,11 +421,9 @@ public class leftAuto extends OpMode {
     public void start() {
         /* Update the telemetry */
         timeSinceStart.reset();
-        gripperRotationServoPosition=0.25;
+        gripperRotationServoPosition=0.5;
         alignmentBarServo.setPosition(alignmentBarUpPos);
-        frontRollerServo.setPower(0.1);
-        backRollerServo.setPower(0.1);
-
+        gripperState="contain";
         //set final parking zone from the camera
         if (tagOfInterest != null) {
             telemetry.addLine("Tag snapshot:\n");
@@ -476,16 +447,31 @@ public class leftAuto extends OpMode {
 
 
     public void loop() {
+        int towerPos = (int)Math.round((towerLeft.getCurrentPosition()+towerRight.getCurrentPosition())/2);
+        int armPos = armMotor.getCurrentPosition()+armOffset;
+        double targetXLast = targetX;
+        double targetYLast = targetY;
         if (Objects.equals(phase, "toCycle")) {
             if (state == 0) {
-                targetX=231;
-                targetY=494;
+                gripperState = "contain";
+                targetX = 330;
+                targetY = -296; //10 HIGHER THAN NORMAL INTAKEPOS
                 state += 1;
+                timer.reset();
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 400, twController.getPositionError(), 80)) {
-                    state += 1;
+                if (timer.milliseconds()>150){
+                    gripperState = "closeTight";
+                }
+                if (timer.milliseconds()>250){
+                    state+=1;
+                    targetX=231;
+                    targetY=515;
                 }
             } else if (state == 2) {
+                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 100)) {
+                    state += 1;
+                }
+            } else if (state == 3) {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
             } else if (state == 4) {
@@ -505,11 +491,9 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.0;
-                collectX=393+20;
-                collectY=-200;
-                //collectX=401+20;
-                //collectY=-170;
+                gripperRotationServoPosition=.5;
+                collectX=413;
+                collectY=-145;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -524,11 +508,9 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.0;
-                collectX=386+15;
-                collectY=-230;
-                //collectX=393+20;
-                //collectY=-200;
+                gripperRotationServoPosition=.5;
+                collectX=403;
+                collectY=-177;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
             if (state != 0 && depositing == false) {
@@ -543,11 +525,9 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.03;
-                collectX=378+20;
-                collectY=-260;
-                //collectX=386+15;
-                //collectY=-230;
+                gripperRotationServoPosition=.5;
+                collectX=393;
+                collectY=-209;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
             if (state != 0 && depositing == false) {
@@ -562,11 +542,9 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.06;
-                collectX=371+20;
-                collectY=-290;
-                //collectX=378+10;
-                //collectY=-260;
+                gripperRotationServoPosition=0.5;
+                collectX=383;
+                collectY=-241;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
@@ -581,24 +559,26 @@ public class leftAuto extends OpMode {
                 state = 0;
             } else {
                 collecting = true;
-                gripperRotationServoPosition=0.1;
-                collectX=364+10;
-                collectY=-320;
+                gripperRotationServoPosition=0.5;
+                collectX=372;
+                collectY=-273;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
-                wheelieBarServo.setPosition(0.55);
+                wheelieBarPosition=0.56;
+                wheelieBarServo.setPosition(wheelieBarPosition);
             } else {
                 depositing = true;
             }
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
-                targetX=268.43871245;
-                targetY=-350.67571868+300;
-                gripperRotationServoPosition=1;
-                alignmentBarServo.setPosition(0.35);
+                targetX=247;
+                targetY=-13;
+                gripperState="close";
+                gripperRotationServoPosition=.56;
+                alignmentBarServo.setPosition(alignmentBarUpPos);
                 state += 1;
             } else if (state == 1) {
                 drive.setPoseEstimate(preCyclePose);
@@ -622,13 +602,11 @@ public class leftAuto extends OpMode {
 
         } else if (Objects.equals(phase, "finish")) {
             if (state == 0) {
-                targetX=268.43871245;
-                targetY=-340.67571868;
-                gripperRotationServoPosition=1;
-                alignmentBarServo.setPosition(0.35);
+                gripperRotationServoPosition=.5;
+                alignmentBarServo.setPosition(alignmentBarUpPos);
                 state += 1;
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 400, twController.getPositionError(), 40)) {
+                if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 100)) {
                     state += 1;
                 }
             } else if (state == 2) {
@@ -643,33 +621,38 @@ public class leftAuto extends OpMode {
                     state=50;
                     depositing = false;
                 } else {
-                    targetX = -380;
-                    targetY = 790-5;
+                    targetX = -483;
+                    targetY = 825;
                     state += 1;
                     timer.reset();
                 }
             } else if (state == 1) {
-                if (timer.milliseconds()>300){
-                    gripperRotationServoPosition=0.25;
-                    alignmentBarServo.setPosition(0.35);
+                if (armPos<0){
+                    gripperRotationServoPosition=0.5;
+                    alignmentBarServo.setPosition(alignmentBarMidPos);
                 }
-                if (withinTolerance(armController.getPositionError(), 38, twController.getPositionError(), 12) || timer.milliseconds()>1200)  {
+                if (withinTolerance(armController.getPositionError(), 20, twController.getPositionError(), 20) || timer.milliseconds()>5000)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
-                    gripperRotationServoPosition=0.25;
+                    gripperRotationServoPosition=0.5;
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 400) {//deposit
-                    frontRollerServo.setPower(-1);
-                    backRollerServo.setPower(-1);
-                    retractAlignmentBar=6;
-                    state += 1;
+                if (timer.milliseconds() >= 200) {//drop
+                    targetX = -483;
+                    targetY = 750;
+                    state+=1;
+                    timer.reset();
                 }
-            } else if (state ==3) {
-                if (timer.milliseconds() >= 740) {
-                    frontRollerServo.setPower(0);
-                    backRollerServo.setPower(0);
+            } else if (state == 3) {
+                if (timer.milliseconds() >= 400) {
+                    gripperState="open";
+                    retractAlignmentBar=retractAlignmentBarDelay;
+                    timer.reset();
+                    state+=1;
+                }
+            } else if (state == 4) {
+                if (timer.milliseconds() >= 200) {
                     depositing = false;
                 }
             }
@@ -682,39 +665,40 @@ public class leftAuto extends OpMode {
                     collecting = false;
                 }
                 else {
-                    targetX = 431-15;
-                    targetY = -48;
+                    targetX = 401;
+                    targetY = -36;
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarUpPos);
                     timer.reset();
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 38, twController.getPositionError(), 12) || timer.milliseconds()>=800) {
+                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds()>=800) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
-                    frontRollerServo.setPower(1);
-                    backRollerServo.setPower(1);
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 500) {
-                    targetX = 431-15;
-                    targetY = -48;
-                    frontRollerServo.setPower(0.1);
-                    backRollerServo.setPower(0.1);
+                if (timer.milliseconds() >= 400) {
+                    gripperState = "closeTight";
                     state += 1;
+                    timer.reset();
                 }
             } else if(state == 3){
-                if (timer.milliseconds() >= 700) {
+                if (timer.milliseconds() >= 300) {
+                    targetX=401;
+                    targetY=-36;
+                    state+=1;
+                    timer.reset();
+                }
+            } else if (state == 4) {
+                if (timer.milliseconds() >= 500) {
                     collecting = false;
                 }
             }
 
         }
-
-
         telemetry.addData("currentFSMState", state);
         telemetry.addData("phase", phase);
         telemetry.addData("depositing?", depositing);
@@ -729,10 +713,6 @@ public class leftAuto extends OpMode {
 
 
         //inverse kinemetics
-        int towerPos = towerLeft.getCurrentPosition();
-        int armPos = armMotor.getCurrentPosition();
-        double targetXLast = targetX;
-        double targetYLast = targetY;
 
 
         //calculate with inverse kinematics

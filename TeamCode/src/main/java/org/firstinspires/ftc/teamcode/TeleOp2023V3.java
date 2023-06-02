@@ -419,7 +419,7 @@ public class TeleOp2023V3 extends OpMode {
 
         //uncomment for tower tuning
         telemetry.addData("twPos", towerPos);
-        telemetry.addData("towerTarget", twTarget-towerPos);
+        telemetry.addData("towerError", twTarget-towerPos);
         telemetry.addData("towerPower", towerPower);
 
         telemetry.addData("TargetX", targetX);
