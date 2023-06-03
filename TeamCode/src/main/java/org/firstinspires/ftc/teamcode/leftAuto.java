@@ -474,7 +474,7 @@ public class leftAuto extends OpMode {
             } else if (state == 3) {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
-            } else if (state == 5) {
+            } else if (state == 5) { //found bug caused used to be 4 not 5
                 phase = "deposit1";
                 state = 0;
             }
