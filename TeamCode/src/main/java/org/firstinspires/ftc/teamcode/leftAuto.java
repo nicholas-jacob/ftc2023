@@ -474,7 +474,7 @@ public class leftAuto extends OpMode {
             } else if (state == 3) {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
-            } else if (state == 4) {
+            } else if (state == 5) {
                 phase = "deposit1";
                 state = 0;
             }
