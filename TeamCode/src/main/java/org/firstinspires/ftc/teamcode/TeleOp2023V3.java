@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class TeleOp2023V3 extends OpMode {
 
 
     //DT
-    //used to have =null but dont think that is nesecary now
+    ElapsedTime loopTime = new ElapsedTime();
     private MecanumDrive mecanum;
     private DcMotorEx frontRightMotor;
     private DcMotorEx frontLeftMotor;
@@ -301,8 +302,8 @@ public class TeleOp2023V3 extends OpMode {
                 retractAlignmentBar = retractAlignmentBarDelay;
         }
 
-        if (gripperState=="open") {
-            if (armPos>1000) {
+        if (gripperState=="open"){
+            if (armPos>1000){
                 leftClaw.setPosition(0.5+gripperOpenPos);
                 rightClaw.setPosition(0.5-gripperOpenPos);
                 telemetry.addData("gripperState", 1);
@@ -410,6 +411,9 @@ public class TeleOp2023V3 extends OpMode {
         armMotor.setPower(armPower);
 
 
+
+        telemetry.addData("loopTime", loopTime.milliseconds());
+        loopTime.reset();
 
 
         //uncomment for arm tuning
