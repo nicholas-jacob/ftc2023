@@ -302,14 +302,14 @@ public class leftAuto extends OpMode {
 
 
 
-        startPose = new Pose2d(-36, -61.3125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(-57.5, -6.75);
+        startPose = new Pose2d(-36.895, -61.3125, Math.toRadians(90));
+        cycle_positionVector = new Vector2d(-56, -5.75);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineTo(new Vector2d(-36,-24))
-                .splineTo(new Vector2d(-49.5, -14), Math.toRadians(194.0362))//og angle is 194.0362
+                .splineTo(new Vector2d(-49.5, -14), Math.toRadians(193.0362))//og angle is 194.0362
                 .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
@@ -331,7 +331,7 @@ public class leftAuto extends OpMode {
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 })
-                .lineToSplineHeading(new Pose2d(-61, -11.75, Math.toRadians(180)),
+                .lineToSplineHeading(new Pose2d(-63, -11.75, Math.toRadians(180)),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -339,7 +339,7 @@ public class leftAuto extends OpMode {
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-36.5, -11.75),
+                .lineToConstantHeading(new Vector2d(-37, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -347,7 +347,7 @@ public class leftAuto extends OpMode {
                 })
                 .build();
         rightPark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-13, -11.75),
+                .lineToConstantHeading(new Vector2d(-13.5, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -464,7 +464,7 @@ public class leftAuto extends OpMode {
                 state += 1;
                 timer.reset();
             } else if (state == 1) {
-                if (timer.milliseconds() > 60 && gamepad2.a) {
+                if (timer.milliseconds() > 60) {
                     armMaxPower=1.5;
                     towerMaxPower=1.5;
                     targetX = 330;
@@ -472,12 +472,12 @@ public class leftAuto extends OpMode {
                     state += 1;
                 }
             } else if (state == 2) {
-                if (timer.milliseconds()>300 && gamepad2.a) {
+                if (timer.milliseconds()>300) {
                     gripperState = "closeTight";
                     state+=1;
                 }
             } else if (state == 3) {
-                if (timer.milliseconds()>500 && gamepad2.b){
+                if (timer.milliseconds()>500){
                     state+=1;
                     targetX=231;
                     targetY=515;
@@ -487,100 +487,100 @@ public class leftAuto extends OpMode {
                 if (withinTolerance(armController.getPositionError(), 300, twController.getPositionError(), 10000)) {
                     state += 1;
                 }
-            } else if (state == 5 && gamepad2.a) {
+            } else if (state == 5) {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
-            } else if (state == 7 && gamepad2.b) { //found bug caused used to be 4 not 5
+            } else if (state == 7) { //found bug caused used to be 4 not 5
                 phase = "deposit1";
                 state = 0;
             }
         } else if (Objects.equals(phase, "deposit1")) { //deposit cone #1
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "collect2";
                 state = 0;
             } else {
                 depositing = true;
             }
         } else if (Objects.equals(phase, "collect2")){ //collect cone #2
-            if (state != 0 && collecting == false && gamepad2.a) {
+            if (state != 0 && collecting == false) {
                 phase = "deposit2";
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=.5;
                 collectX=403-10; //og is +10 on x
-                collectY=-165; // og is +20 on y
+                collectY=-180; // og is +35 on y
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "collect3";
                 state = 0;
             } else {
                 depositing = true;
             }
         } else if (Objects.equals(phase, "collect3")){ //collect cone #3
-            if (state != 0 && collecting == false && gamepad2.a) {
+            if (state != 0 && collecting == false) {
                 phase = "deposit3";
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=.5;
                 collectX=397-10;
-                collectY=-197;
+                collectY=-197-15;
             }
         } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "collect4";
                 state = 0;
             } else {
                 depositing = true;
             }
         } else if (Objects.equals(phase, "collect4")){ //collect cone #4
-            if (state != 0 && collecting == false && gamepad2.a) {
+            if (state != 0 && collecting == false) {
                 phase = "deposit4";
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=.5;
                 collectX=393-10;
-                collectY=-229;
+                collectY=-229-15;
             }
         }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "collect5";
                 state = 0;
             } else {
                 depositing = true;
             }
         } else if (Objects.equals(phase, "collect5")){ //collect cone #5
-            if (state != 0 && collecting == false && gamepad2.a) {
+            if (state != 0 && collecting == false) {
                 phase = "deposit5";
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.5;
                 collectX=385-10;
-                collectY=-261;
+                collectY=-261-15;
             }
         }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "collect6";
                 state = 0;
             } else {
                 depositing = true;
             }
         } else if (Objects.equals(phase, "collect6")){ //collect cone #6
-            if (state != 0 && collecting == false && gamepad2.a) {
+            if (state != 0 && collecting == false) {
                 phase = "deposit6";
                 state = 0;
             } else {
                 collecting = true;
                 gripperRotationServoPosition=0.5;
                 collectX=379-10;
-                collectY=-293;
+                collectY=-293-15;
             }
         }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
-            if (state != 0 && depositing == false && gamepad2.a) {
+            if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
                 wheelieBarPosition=0.56;
@@ -638,8 +638,8 @@ public class leftAuto extends OpMode {
                     depositing = false;
                 } else {
                     towerMaxPower=1.5;
-                    targetX = -433;//og -483
-                    targetY = 780;//og 825
+                    targetX = -418;//og -483
+                    targetY = 760;//og 825
                     state += 1;
                     timer.reset();
                 }
@@ -648,21 +648,21 @@ public class leftAuto extends OpMode {
                     gripperRotationServoPosition=0.5;
                     alignmentBarServo.setPosition(alignmentBarMidPos);
                 }
-                if (withinTolerance(armController.getPositionError(), 20, twController.getPositionError(), 30) || timer.milliseconds()>5000)  {
+                if (withinTolerance(armController.getPositionError(), 20, twController.getPositionError(), 20) || timer.milliseconds()>1000)  {
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarDownPos);
                     gripperRotationServoPosition=0.5;
                     timer.reset();
                 }
-            } else if (state == 2 && gamepad2.a) {
+            } else if (state == 2) {
                 if (timer.milliseconds() >= 450) {//drop
-                    targetX = -433;
-                    targetY = 700;
+                    targetX = -418;
+                    targetY = 650;
                     state+=1;
                     timer.reset();
                 }
             } else if (state == 3) {
-                if (timer.milliseconds() >= 100 & gamepad2.a) {
+                if (timer.milliseconds() >= 100) {
                     gripperState="open";
                     retractAlignmentBar=retractAlignmentBarDelay;
                     timer.reset();
@@ -689,7 +689,7 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
 
-            } else if (state == 1 && gamepad2.b) {
+            } else if (state == 1) {
                 if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds()>=5000) {
                     state += 1;
                     targetX = collectX;
@@ -697,21 +697,21 @@ public class leftAuto extends OpMode {
                     gripperState = "closePrep";
                     timer.reset();
                 }
-            } else if (state == 2 && gamepad2.b) {
+            } else if (state == 2) {
                 if (timer.milliseconds() >= 500) {
                     gripperState = "closeTight";
                     state += 1;
                     timer.reset();
                 }
-            } else if(state == 3 && gamepad2.b){
-                if (timer.milliseconds() >= 250) {
+            } else if(state == 3){
+                if (timer.milliseconds() >= 150) {
                     targetX=411;
                     targetY=-36;
                     state+=1;
                     timer.reset();
                 }
-            } else if (state == 4 && gamepad2.b) {
-                if (timer.milliseconds() >= 150) {
+            } else if (state == 4) {
+                if (timer.milliseconds() >= 130) {
                     collecting = false;
                 }
             }

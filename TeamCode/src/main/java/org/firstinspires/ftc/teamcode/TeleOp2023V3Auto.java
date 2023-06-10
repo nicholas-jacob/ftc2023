@@ -223,19 +223,25 @@ public class TeleOp2023V3Auto extends OpMode {
         double targetXLast=targetX;
         double targetYLast=targetY;
 
+        //wheelie bar deploy
+        if (gamepad1.right_bumper){
+            wheelieBarPosition=0.03;
+        } else {
+            wheelieBarPosition=0.56;
+        }
 
         //intakePosition
         if (gamepad2.right_bumper){
             targetX=330;
-            targetY=-306;
+            targetY=-296;
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.5;
             gripperState="open";
         }
         //intake thrust
         if (gamepad2.left_trigger>0.5){
-            targetX=426;
-            targetY=-319;
+            targetX=461;
+            targetY=-281;
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.5;
             gripperState="open";
