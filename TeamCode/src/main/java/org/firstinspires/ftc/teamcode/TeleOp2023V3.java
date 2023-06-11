@@ -224,7 +224,7 @@ public class TeleOp2023V3 extends OpMode {
         double targetYLast=targetY;
 
         //wheelie bar deploy
-        if (gamepad1.right_bumper){
+        if (gamepad1.right_trigger>0.5){
             wheelieBarPosition=0.03;
         } else {
             wheelieBarPosition=0.56;
@@ -234,7 +234,7 @@ public class TeleOp2023V3 extends OpMode {
         //intakePosition
         if (gamepad2.right_bumper){
             targetX=330;
-            targetY=-296;
+            targetY=-296; //-296
             alignmentBarServo.setPosition(alignmentBarUpPos);
             gripperRotationServoPosition=0.5;
             gripperState="open";
@@ -287,7 +287,7 @@ public class TeleOp2023V3 extends OpMode {
                 gripperRotationServoPosition=0.5;
             } else{
                 targetX=-119;
-                targetY=687;
+                targetY=697; //og 687
                 alignmentBarServo.setPosition(alignmentBarMidPos);
                 gripperRotationServoPosition=0.5;
             }

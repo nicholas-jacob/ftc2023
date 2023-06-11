@@ -339,7 +339,7 @@ public class leftAuto extends OpMode {
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-37, -11.75),
+                .lineToConstantHeading(new Vector2d(-36.5, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -347,7 +347,7 @@ public class leftAuto extends OpMode {
                 })
                 .build();
         rightPark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-13.5, -11.75),
+                .lineToConstantHeading(new Vector2d(-13, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
