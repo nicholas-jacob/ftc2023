@@ -67,11 +67,15 @@ public class TeleOp2023V3 extends OpMode {
     private double targetY=0;
 
     //GR
+    private Servo leftOdoLift;
+    private Servo rightOdoLift;
     private Servo gripperRotationServo;
     private Servo alignmentBarServo;
     private Servo leftClaw;
     private Servo rightClaw;
     private Servo wheelieBarServo;
+    public static double leftOdoLiftPos=0.5;
+    public static double rightOdoLiftPos=0.5;
     public static double wheelieBarPosition=.56;
     private int retractAlignmentBar = 0;
     public static int retractAlignmentBarDelay=3;
@@ -89,15 +93,14 @@ public class TeleOp2023V3 extends OpMode {
     private static boolean gp2ANotPressed;
 
 
-
+    List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
     @Override
     public void init() {
 
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
         //set up mecanum drive
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "motorFrontRight");
@@ -173,7 +176,8 @@ public class TeleOp2023V3 extends OpMode {
         //set servos
         gripperRotationServo.setPosition(gripperRotationServoPosition);
         alignmentBarServo.setPosition(alignmentBarUpPos);
-
+        leftOdoLift.setPosition(leftOdoLiftPos);
+        rightOdoLift.setPosition(rightOdoLiftPos);
     }
 
     public void start() {
@@ -186,6 +190,11 @@ public class TeleOp2023V3 extends OpMode {
 
     @Override
     public void loop() {
+
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
+
         //dt code
         //code to let driver reset starting angle
         if (gamepad1.dpad_up){
@@ -218,8 +227,8 @@ public class TeleOp2023V3 extends OpMode {
             mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         }
         // finite state machine goes here
-        int towerPos = (int)Math.round((towerLeft.getCurrentPosition()+towerRight.getCurrentPosition())/2);
-        int armPos = armMotor.getCurrentPosition()+armOffset;
+        int towerPos = -backLeftMotor.getCurrentPosition();
+        int armPos = -backRightMotor.getCurrentPosition()+armOffset;
         double targetXLast=targetX;
         double targetYLast=targetY;
 
@@ -281,8 +290,11 @@ public class TeleOp2023V3 extends OpMode {
         //high
         if (gamepad2.dpad_up){
             if (gamepad2.right_trigger>0.5){
-                targetX=526;
-                targetY=554;
+                targetX = -418;
+                targetY = 760;
+
+                //targetX=526;
+                //targetY=554;
                 alignmentBarServo.setPosition(alignmentBarMidPos);
                 gripperRotationServoPosition=0.5;
             } else{
@@ -358,7 +370,8 @@ public class TeleOp2023V3 extends OpMode {
         //set wheelie bar
         wheelieBarServo.setPosition(wheelieBarPosition);
 
-
+        leftOdoLift.setPosition(leftOdoLiftPos);
+        rightOdoLift.setPosition(rightOdoLiftPos);
 
 
 
