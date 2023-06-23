@@ -19,7 +19,7 @@ public class MeepMeepTesting {
                                         .lineTo(new Vector2d(36,-24))
                                         .splineTo(new Vector2d(49.5, -14), Math.toRadians(-14.0392))//og angle is 194.0362
                                         .splineToConstantHeading(new Vector2d(57.5, -6.75), Math.toRadians(90-14.0362))
-                                        .lineToSplineHeading(new Pose2d(61, -11.75, Math.toRadians(180)),
+                                        .lineToSplineHeading(new Pose2d(61, -11.75, Math.toRadians(180)))
                                 .build()
 
                 );

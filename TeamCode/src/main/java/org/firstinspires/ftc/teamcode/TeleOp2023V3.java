@@ -74,8 +74,8 @@ public class TeleOp2023V3 extends OpMode {
     private Servo leftClaw;
     private Servo rightClaw;
     private Servo wheelieBarServo;
-    public static double leftOdoLiftPos=0.5;
-    public static double rightOdoLiftPos=0.5;
+    public static double leftOdoLiftPos=0.05; //0.52 up pos
+    public static double rightOdoLiftPos=1; //0.48 down pos
     public static double wheelieBarPosition=.56;
     private int retractAlignmentBar = 0;
     public static int retractAlignmentBarDelay=3;
@@ -93,11 +93,11 @@ public class TeleOp2023V3 extends OpMode {
     private static boolean gp2ANotPressed;
 
 
-    List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
 
     @Override
     public void init() {
-
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule hub : allHubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
@@ -121,6 +121,8 @@ public class TeleOp2023V3 extends OpMode {
         backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
         //setUpServos
+        leftOdoLift = hardwareMap.get(Servo.class, "leftOdoLift");
+        rightOdoLift = hardwareMap.get(Servo.class, "rightOdoLift");
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
         rightClaw = hardwareMap.get(Servo.class, "rightClaw");
         alignmentBarServo = hardwareMap.get(Servo.class, "alignmentBarServo");
@@ -190,7 +192,7 @@ public class TeleOp2023V3 extends OpMode {
 
     @Override
     public void loop() {
-
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : allHubs) {
             hub.clearBulkCache();
         }
