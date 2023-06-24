@@ -1,19 +1,27 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.outoftheboxrobotics.photoncore.PhotonLynxModule;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
@@ -22,6 +30,8 @@ import java.util.List;
 @Config
 @TeleOp
 public class TeleOp2023V3 extends OpMode {
+
+
     // if auto was just ran set true else set flase
     private final boolean auto=false;
 
@@ -35,7 +45,7 @@ public class TeleOp2023V3 extends OpMode {
     private DcMotorEx frontLeftMotor;
     private DcMotorEx backRightMotor;
     private DcMotorEx backLeftMotor;
-    private BNO055IMU imu;
+    private BHI260IMU imu;
     private double angleOffset=0;
     private boolean foc=true;
     //TW
@@ -97,22 +107,30 @@ public class TeleOp2023V3 extends OpMode {
 
     @Override
     public void init() {
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+
+//        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+//
+//        for (LynxModule hub : allHubs) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
         //set up mecanum drive
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "motorFrontRight");
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "motorFrontLeft");
         backRightMotor = hardwareMap.get(DcMotorEx.class, "motorBackRight");
         backLeftMotor = hardwareMap.get(DcMotorEx.class, "motorBackLeft");
         mecanum = new MecanumDrive(frontRightMotor, frontLeftMotor, backRightMotor, backLeftMotor);
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        imu = hardwareMap.get(BHI260IMU.class, "imu");
+        IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                )
+        );
         imu.initialize(parameters);
-        angleOffset=imu.getAngularOrientation().firstAngle;
+
+        YawPitchRollAngles robotOrientation = imu.getRobotYawPitchRollAngles();
+        angleOffset=robotOrientation.getYaw(AngleUnit.RADIANS);
 
 
         frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -165,6 +183,9 @@ public class TeleOp2023V3 extends OpMode {
         armMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         armMotor.setPower(0);
 
+
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.enable();
         //ftc dashboard stuff
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
@@ -192,24 +213,25 @@ public class TeleOp2023V3 extends OpMode {
 
     @Override
     public void loop() {
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-        for (LynxModule hub : allHubs) {
-            hub.clearBulkCache();
-        }
-
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        //List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        //for (LynxModule hub : allHubs) {
+        //    hub.clearBulkCache();
+        //}
         //dt code
         //code to let driver reset starting angle
+        YawPitchRollAngles robotOrientation = imu.getRobotYawPitchRollAngles();
         if (gamepad1.dpad_up){
-            angleOffset=imu.getAngularOrientation().firstAngle;
+            angleOffset=robotOrientation.getYaw(AngleUnit.RADIANS);
         }
         if (gamepad1.dpad_right){
-            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(90);
+            angleOffset=robotOrientation.getYaw(AngleUnit.RADIANS)+Math.toRadians(90);
         }
         if (gamepad1.dpad_down){
-            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(180);
+            angleOffset=robotOrientation.getYaw(AngleUnit.RADIANS)+Math.toRadians(180);
         }
         if (gamepad1.dpad_left){
-            angleOffset=imu.getAngularOrientation().firstAngle+Math.toRadians(270);
+            angleOffset=robotOrientation.getYaw(AngleUnit.RADIANS)+Math.toRadians(270);
         }
 
         if (gamepad1.a){
@@ -219,7 +241,7 @@ public class TeleOp2023V3 extends OpMode {
             foc = false;
         }
         if (foc){ //disables foc if foc variable is false
-            double angle=imu.getAngularOrientation().firstAngle-angleOffset;
+            double angle=robotOrientation.getYaw(AngleUnit.RADIANS)-angleOffset;
             double X= gamepad1.left_stick_x;
             double Y= gamepad1.left_stick_y;
             double Xprime=X*Math.cos(angle)-Y*Math.sin(angle);
@@ -435,6 +457,7 @@ public class TeleOp2023V3 extends OpMode {
 
 
         telemetry.addData("loopTime", loopTime.milliseconds());
+        telemetry.addData("robotYaw", robotOrientation.getYaw(AngleUnit.RADIANS));
         loopTime.reset();
 
 
