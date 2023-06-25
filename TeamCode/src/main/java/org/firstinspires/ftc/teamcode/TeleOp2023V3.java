@@ -172,9 +172,8 @@ public class TeleOp2023V3 extends OpMode {
 
         //reset encoders only if auto wasn't just run
         if (!auto){
-            towerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            towerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
         towerRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         towerLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -457,24 +456,26 @@ public class TeleOp2023V3 extends OpMode {
 
 
         telemetry.addData("loopTime", loopTime.milliseconds());
-        telemetry.addData("robotYaw", robotOrientation.getYaw(AngleUnit.RADIANS));
+//        telemetry.addData("robotYaw", robotOrientation.getYaw(AngleUnit.RADIANS));
         loopTime.reset();
 
 
-        //uncomment for arm tuning
-        telemetry.addData("armPos", armPos);
-        telemetry.addData("armError", armTarget-armPos);
+//        //uncomment for arm tuning
+//        telemetry.addData("armPos", armPos);
+//        telemetry.addData("armError", armTarget-armPos);
         telemetry.addData("armPower", armPower);
-
-        //uncomment for tower tuning
-        telemetry.addData("twPos", towerPos);
-        telemetry.addData("towerError", twTarget-towerPos);
+//
+//        //uncomment for tower tuning
+//        telemetry.addData("twPos", towerPos);
+//        telemetry.addData("towerError", twTarget-towerPos);
         telemetry.addData("towerPower", towerPower);
-
+//
         telemetry.addData("TargetX", targetX);
         telemetry.addData("TargetY", targetY);
 
         telemetry.update();
+
+
 
     }
 
