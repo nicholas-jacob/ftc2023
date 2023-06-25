@@ -67,7 +67,7 @@ import java.util.Timer;
 
 
 @Autonomous
-public class leftAuto extends OpMode {
+public class rightAuto extends OpMode {
 
 
 
@@ -163,7 +163,7 @@ public class leftAuto extends OpMode {
     int left = 1;
     int middle = 2;
     int right = 3;
-    int signal = 1;
+    int signal = 3;
 
 
     AprilTagDetection tagOfInterest = null;
@@ -302,15 +302,15 @@ public class leftAuto extends OpMode {
 
 
 
-        startPose = new Pose2d(-36.895, -61.3125, Math.toRadians(90));
-        cycle_positionVector = new Vector2d(-56, -5.75);
+        startPose = new Pose2d(36.895, -61.3125, Math.toRadians(90));
+        cycle_positionVector = new Vector2d(56.5, -7.25);
 
 
 
         cycle_position = drive.trajectoryBuilder(startPose)
-                .lineTo(new Vector2d(-36,-24))
-                .splineTo(new Vector2d(-49.5, -14), Math.toRadians(193.0362))//og angle is 194.0362
-                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90+14.0362))
+                .lineTo(new Vector2d(36,-24))
+                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-15.0392))//og angle is 194.0362
+                .splineToConstantHeading(cycle_positionVector, Math.toRadians(90-14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -322,7 +322,7 @@ public class leftAuto extends OpMode {
                     drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 })
                 .build();
-        leftPark = drive.trajectoryBuilder(cycle_position.end())
+        rightPark = drive.trajectoryBuilder(cycle_position.end())
                 .addDisplacementMarker(() -> {
                     wheelieBarPosition=0.56;
                     wheelieBarServo.setPosition(wheelieBarPosition);
@@ -331,23 +331,23 @@ public class leftAuto extends OpMode {
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 })
-                .lineToSplineHeading(new Pose2d(-63, -11.75, Math.toRadians(180)),
+                .lineToSplineHeading(new Pose2d(63, -11.75, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        middlePark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-36.5, -11.75),
+        middlePark = drive.trajectoryBuilder(rightPark.end())
+                .lineToConstantHeading(new Vector2d(36.5, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
-        rightPark = drive.trajectoryBuilder(leftPark.end())
-                .lineToConstantHeading(new Vector2d(-13, -11.75),
+        leftPark = drive.trajectoryBuilder(rightPark.end())
+                .lineToConstantHeading(new Vector2d(13, -11.75),
                         SampleMecanumDrive.getVelocityConstraint(40, Math.toRadians(180), DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(25))
                 .addDisplacementMarker(() -> {
@@ -409,8 +409,8 @@ public class leftAuto extends OpMode {
                 signal = middle;
             }
         } else {
-            telemetry.addLine("will go left Bc didn't find anything");
-            signal = left;
+            telemetry.addLine("will go right Bc didn't find anything");
+            signal = right;
         }
         telemetry.update();
     }
@@ -598,16 +598,16 @@ public class leftAuto extends OpMode {
                 state += 1;
             } else if (state == 1) {
                 drive.setPoseEstimate(preCyclePose);
-                drive.followTrajectoryAsync(leftPark);
+                drive.followTrajectoryAsync(rightPark);
                 state+=1;
             } else if (state == 3) {
-                if (signal==left){
+                if (signal==right){
                     state+=2;
                 } else if (signal==middle){
                     drive.followTrajectoryAsync(middlePark);
                     state+=1;
-                } else if (signal==right){
-                    drive.followTrajectoryAsync(rightPark);
+                } else if (signal==left){
+                    drive.followTrajectoryAsync(leftPark);
                     state+=1;
                 }
             } else if (state == 5) {

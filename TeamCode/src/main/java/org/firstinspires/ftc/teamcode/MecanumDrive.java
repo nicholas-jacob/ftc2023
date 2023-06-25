@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -19,10 +20,10 @@ public class MecanumDrive {
         backRightMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         backLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        frontLeftMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        backRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        backLeftMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         frontRightMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontLeftMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);

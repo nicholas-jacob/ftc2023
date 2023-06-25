@@ -67,22 +67,27 @@ public class ParkAuto extends OpMode {
 
     //TW
     private PIDController twController;
-    public static double Tp=0.03, Ti = 0, Td = 0.0014;
-    public static double Tf = 0.27;
+    public static double Tp=0.03, Ti = 0, Td = 0.001;
+    public static double Tf = 0.04, Ts=0, towerTolerance=8;//0.27;
 
     public static int twTarget = 0;
     private final double ticksPerMM = 1.503876;
     private DcMotorEx towerRight;
     private DcMotorEx towerLeft;
+
+    public static double towerMaxPower = 1.5;
+
     //ARM
     private PIDController armController;
 
-    public static double Ap = 0.006, Ai = 0, Ad = 0.0006;
-    public static double Af = 0.13;
+    public static double Ap = 0.005, Ai = 0, Ad = 0.0006;
+    public static double Af = 0.15, As = 0, armTolerance= 50;
 
     public static int armTarget = 0;
-    private final double ticksPerRadian = 28 * (2.89655) * (3.61905) * (5.23077) * (2.4) / (2 * Math.PI);
+    private final double ticksPerRadian = 1425.1 * (2.4) / (2 * Math.PI);;
     private DcMotorEx armMotor;
+
+    public static double armMaxPower = 1.5;
 
     private double targetX=0;
     private double targetY=0;
@@ -94,7 +99,7 @@ public class ParkAuto extends OpMode {
     private CRServo backRollerServo;
     private int retractAlignmentBar = 0;
     private final double alignmentBarDownPos = 0;
-    private final double alignmentBarUpPos = 0.5;
+    private final double alignmentBarUpPos = 0.75;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=1;
 
@@ -163,14 +168,14 @@ public class ParkAuto extends OpMode {
 
         towerRight.setDirection(DcMotorEx.Direction.REVERSE);
         towerLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        towerRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        towerLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         //setUp arm
         armController = new PIDController(Ap, Ai, Ad);
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
 
         armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         inverseKinematics = new InverseKinematics(ticksPerRadian, ticksPerMM);
 
@@ -247,7 +252,7 @@ public class ParkAuto extends OpMode {
 
     public void init_loop() {
         //inverse kinematics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         twController.setPID(Tp, Ti, Td);
         armController.setPID(Ap, Ai, Ad);
@@ -283,11 +288,7 @@ public class ParkAuto extends OpMode {
 
         //set servos
         gripperRotationServo.setPosition(gripperRotationServoPosition);
-        alignmentBarServo.setPosition(0.5);
-        telemetry.addData("armTarget", armTarget);
-        telemetry.addData("armPos", armPos);
-        telemetry.addData("towerTarget", twTarget);
-        telemetry.addData("towerPos", towerPos);
+        alignmentBarServo.setPosition(0.35);
 
         telemetry.update();
 
@@ -306,22 +307,6 @@ public class ParkAuto extends OpMode {
                     break;
                 }
             }
-
-            if (tagFound) {
-                telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                //tagToTelemetry(tagOfInterest);
-            } else {
-                telemetry.addLine("Don't see tag of interest :(");
-
-                if (tagOfInterest == null) {
-                    telemetry.addLine("(The tag has never been seen)");
-                } else {
-                    telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                    //tagToTelemetry(tagOfInterest);
-                }
-            }
-
-            telemetry.addLine("Don't see tag of interest :(");
 
 
 
@@ -353,6 +338,9 @@ public class ParkAuto extends OpMode {
     public void start() {
         /* Update the telemetry */
         gripperRotationServoPosition=0.35;
+        alignmentBarServo.setPosition(alignmentBarUpPos);
+        frontRollerServo.setPower(0.1);
+        backRollerServo.setPower(0.1);
 
         //set final parking zone from the camera
         if (tagOfInterest != null) {
@@ -372,12 +360,12 @@ public class ParkAuto extends OpMode {
 
     public void loop(){
         if (state==0) {
-            targetX = 0;
-            targetY = 542.75598018;
+            targetX=231;
+            targetY=494;
             state+=1;
         }
         else if (state==1){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+            if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)){
                 state+=1;
             }
         }
@@ -399,12 +387,14 @@ public class ParkAuto extends OpMode {
             state+=1;
         }
         else if (state==6){
-            targetX=388.43871245;
-            targetY=-320.67571868;
+            targetX=308.43871245;
+            targetY=-300.67571868;
+            gripperRotationServoPosition=1;
+            alignmentBarServo.setPosition(0.35);
             state+=1;
         }
         else if (state==7){
-            if (withinTolerance(armController.getPositionError(), twController.getPositionError())){
+            if (withinTolerance(armController.getPositionError(), 100, twController.getPositionError(), 20)){
                 state+=1;
             }
         }
@@ -417,7 +407,7 @@ public class ParkAuto extends OpMode {
 
 
         //inverse kinemetics
-        int towerPos = towerRight.getCurrentPosition();
+        int towerPos = towerLeft.getCurrentPosition();
         int armPos = armMotor.getCurrentPosition();
         double targetXLast=targetX;
         double targetYLast=targetY;
@@ -437,30 +427,48 @@ public class ParkAuto extends OpMode {
         twController.setPID(Tp, Ti, Td);
         double towerPid = twController.calculate(towerPos, twTarget);
         double towerFf = Tf;
-
-        double towerPower = towerPid + towerFf;
-        if (!done){
-            towerRight.setPower(towerPower);
-            towerLeft.setPower(towerPower);
+        double towerFs=0;
+        if (twController.getPositionError()>towerTolerance){ //static friction code
+            towerFs=Ts;
+        } else if(twController.getPositionError()<-towerTolerance) {
+            towerFs = -Ts;
         }
-        else{
-            towerRight.setPower(0);
-            towerLeft.setPower(0);
+        double towerPower = towerPid + towerFs;
+        if (towerPower>towerMaxPower){
+            towerPower=towerMaxPower;
         }
-
+        if (towerPower<-towerMaxPower){
+            towerPower=-towerMaxPower;
+        }
+        towerPower+=towerFf;
 
         //arm controller
         armController.setPID(Ap, Ai, Ad);
-
         double armPid = armController.calculate(armPos, armTarget);
         double armFf = -Math.sin((armPos / ticksPerRadian)-0.236) * Af;
-
-        double armPower = armPid + armFf;
+        double armFs = 0;
+        if (armController.getPositionError()>armTolerance){
+            armFs=As;
+        } else if(armController.getPositionError()<-armTolerance) {
+            armFs=-As;
+        }
+        double armPower = armPid + armFs;
+        if (armPower>armMaxPower){
+            armPid=armMaxPower;
+        }
+        if (armPid<-armMaxPower){
+            armPid=-armMaxPower;
+        }
+        armPower+=armFf;
         if (!done){
+            towerRight.setPower(towerPower);
+            towerLeft.setPower(towerPower);
             armMotor.setPower(armPower);
         }
         else{
             armMotor.setPower(0);
+            towerRight.setPower(0);
+            towerLeft.setPower(0);
         }
 
 
@@ -478,9 +486,7 @@ public class ParkAuto extends OpMode {
 
         telemetry.update();
     }
-    public Boolean withinTolerance(double armError, double towerError){
-        int armTolerance=20;
-        int towerTolerance=20;
+    public Boolean withinTolerance(double armError, int armTolerance, double towerError, int towerTolerance){
         if (Math.abs(armError)<=armTolerance && Math.abs(towerError)<=towerTolerance){
             return true;
         }
