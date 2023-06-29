@@ -95,10 +95,10 @@ public class TeleOp2023V3 extends OpMode {
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=.5;
     //in distance away from 0.5;
-    public static double gripperOpenPos=0.2;
-    public static double gripperHalfOpenPos=0.03;
-    public static double gripperClosePos=-0.07;
-    public static double gripperCloseTight=-.15;
+    public static double gripperOpenPos=0.8;
+    public static double gripperHalfOpenPos=0.7;
+    public static double gripperClosePos=0.6;
+    public static double gripperCloseTight=0.5;
     public String gripperState="open";
     private static boolean gp2ANotPressed;
 
@@ -174,6 +174,8 @@ public class TeleOp2023V3 extends OpMode {
         if (!auto){
             backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
         towerRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         towerLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -346,12 +348,12 @@ public class TeleOp2023V3 extends OpMode {
 
         if (gripperState=="open"){
             if (armPos>1000){
-                leftClaw.setPosition(0.5+gripperOpenPos);
-                rightClaw.setPosition(0.5-gripperOpenPos);
+                leftClaw.setPosition(gripperOpenPos);
+                rightClaw.setPosition(gripperOpenPos);
                 telemetry.addData("gripperState", 1);
             } else{
-                leftClaw.setPosition(0.5+gripperHalfOpenPos);
-                rightClaw.setPosition(0.5-gripperHalfOpenPos);
+                leftClaw.setPosition(gripperHalfOpenPos);
+                rightClaw.setPosition(gripperHalfOpenPos);
                 telemetry.addData("gripperState", 2);
             }
             if (gamepad2.a){
@@ -361,8 +363,8 @@ public class TeleOp2023V3 extends OpMode {
 
             }
         } else if(gripperState=="close") {
-            leftClaw.setPosition(0.5+gripperClosePos);
-            rightClaw.setPosition(0.5-gripperClosePos);
+            leftClaw.setPosition(gripperClosePos);
+            rightClaw.setPosition(gripperClosePos);
             telemetry.addData("gripperState", 3);
             if (gamepad2.a == false){
                 gp2ANotPressed=true;
@@ -371,8 +373,8 @@ public class TeleOp2023V3 extends OpMode {
                 gripperState="closeTight";
             }
         } else {
-            leftClaw.setPosition(0.5+gripperCloseTight);
-            rightClaw.setPosition(0.5-gripperCloseTight);
+            leftClaw.setPosition(gripperCloseTight);
+            rightClaw.setPosition(gripperCloseTight);
         }
 
         if (gamepad2.x){

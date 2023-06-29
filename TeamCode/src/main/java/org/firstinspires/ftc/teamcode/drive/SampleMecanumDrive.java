@@ -58,10 +58,10 @@ import java.util.List;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0); // og 8, 0.3
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0  ); //og 8, 0.3
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(22, 3, 2); // og 8, 0.3
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(30, 3.5, 2  ); //og 8, 0.3
 
-    public static double LATERAL_MULTIPLIER =1;
+    public static double LATERAL_MULTIPLIER =1.536;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -82,9 +82,8 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
-
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.25, 0.25, Math.toRadians(3.0)), 1.25);
+                new Pose2d(0.25, 0.25, Math.toRadians(.5)), 10);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
