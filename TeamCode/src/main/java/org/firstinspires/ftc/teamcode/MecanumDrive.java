@@ -15,10 +15,6 @@ public class MecanumDrive {
         frontLeftMotor=flm;
         backRightMotor=brm;
         backLeftMotor=blm;
-        frontRightMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backRightMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         frontRightMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         frontLeftMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);

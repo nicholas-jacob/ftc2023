@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
+import java.util.List;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -17,14 +21,28 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
     @Override
+
     public void runOpMode() throws InterruptedException {
+        ElapsedTime timer = new ElapsedTime();
+
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.enable();
         waitForStart();
 
         while (!isStopRequested()) {
+            for (LynxModule hub : allHubs) {
+                hub.clearBulkCache();
+            }
+
+            //PhotonCore.CONTROL_HUB.clearBulkCache();
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
@@ -36,6 +54,8 @@ public class LocalizationTest extends LinearOpMode {
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
+            telemetry.addData("loopTime", timer.milliseconds());
+            timer.reset();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
