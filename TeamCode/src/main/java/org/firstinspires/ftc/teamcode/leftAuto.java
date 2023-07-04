@@ -770,14 +770,13 @@ public class leftAuto extends OpMode {
             towerFs = -Ts;
         }
         double towerPower = towerPid + towerFs;
-        towerPower+=towerFf;
-        if (towerPower>towerMaxPower){
+        if (towerPower>=towerMaxPower){
             towerPower=towerMaxPower;
         }
         if (towerPower<-towerMaxPower){
             towerPower=-towerMaxPower;
         }
-
+        towerPower+=towerFf;
         //arm controller
         armController.setPID(Ap, Ai, Ad);
         double armPid = armController.calculate(armPos, armTarget);

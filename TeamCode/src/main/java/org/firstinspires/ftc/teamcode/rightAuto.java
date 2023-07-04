@@ -308,7 +308,7 @@ public class rightAuto extends OpMode {
                 .lineToConstantHeading(new Vector2d(34.5,-46))
                 .splineToSplineHeading(new Pose2d(36.5,-24, Math.toRadians(70)), Math.toRadians(70))
                 .splineTo(new Vector2d(49.5, -14), Math.toRadians(-15.0362))//og angle is 194.0362
-                .splineToConstantHeading(new Vector2d(56.8, -7.5), Math.toRadians(90-14.0362))
+                .splineToConstantHeading(new Vector2d(56.8-.25, -7.5), Math.toRadians(90-14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -698,7 +698,7 @@ public class rightAuto extends OpMode {
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds()>=1500) {
+                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds() >= 1500) {
                     state += 1;
                     targetX = collectX;
                     targetY = collectY;
@@ -706,19 +706,26 @@ public class rightAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 600) {
+                if (timer.milliseconds() >= 500) {
+                    targetX += 45;
+                    state += 1;
+                    towerMaxPower=0;
+                }
+            } else if (state == 3) {
+                if (timer.milliseconds() >= 750) {
                     gripperState = "closeTight";
+                    towerMaxPower=1.5;
                     state += 1;
                     timer.reset();
                 }
-            } else if(state == 3){
+            } else if(state == 4){
                 if (timer.milliseconds() >= 150) {
                     targetX = 340; //340
                     targetY = 0; //-17
                     state+=1;
                     timer.reset();
                 }
-            } else if (state == 4) {
+            } else if (state == 5) {
                 if (timer.milliseconds() >= 180) { //130
                     collecting = false;
                 }
@@ -770,14 +777,13 @@ public class rightAuto extends OpMode {
             towerFs = -Ts;
         }
         double towerPower = towerPid + towerFs;
-        towerPower+=towerFf;
-        if (towerPower>towerMaxPower){
+        if (towerPower>=towerMaxPower){
             towerPower=towerMaxPower;
         }
         if (towerPower<-towerMaxPower){
             towerPower=-towerMaxPower;
         }
-
+        towerPower += towerFf;
         //arm controller
         armController.setPID(Ap, Ai, Ad);
         double armPid = armController.calculate(armPos, armTarget);
