@@ -264,7 +264,7 @@ public class leftAuto extends OpMode {
 
         //camera setup
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "RightCam"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
 
@@ -272,7 +272,7 @@ public class leftAuto extends OpMode {
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                camera.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(960, 720, OpenCvCameraRotation.UPRIGHT);
             }
 
 
@@ -300,7 +300,7 @@ public class leftAuto extends OpMode {
         drive.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        startPose = new Pose2d(-34.5, -64.065, Math.toRadians(180));
+        startPose = new Pose2d(-33, -64.065, Math.toRadians(180));
         //against back wall and 2in away from right edge of tile
 
 
@@ -308,7 +308,7 @@ public class leftAuto extends OpMode {
                 .lineToConstantHeading(new Vector2d(-34.5,-46))
                 .splineToSplineHeading(new Pose2d(-36.5,-24, Math.toRadians(110)), Math.toRadians(110))
                 .splineTo(new Vector2d(-49.5, -14), Math.toRadians(192.5362))//og angle is 194.0362
-                .splineToConstantHeading(new Vector2d(-56.9, -6.5), Math.toRadians(90+14.0362))
+                .splineToConstantHeading(new Vector2d(-57.3, -6.5), Math.toRadians(90+14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -341,13 +341,13 @@ public class leftAuto extends OpMode {
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(prePark.end())
-                .lineToConstantHeading(new Vector2d(-12.5, -11.75))
+                .lineToConstantHeading(new Vector2d(-12, -11.75))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
         rightPark = drive.trajectoryBuilder(prePark.end())
-                .lineToConstantHeading(new Vector2d(11.5, -11.75))
+                .lineToConstantHeading(new Vector2d(12, -11.75))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
@@ -408,7 +408,7 @@ public class leftAuto extends OpMode {
             }
         } else {
             telemetry.addLine("will go left Bc didn't find anything");
-            signal = right;
+            signal = left;
         }
         telemetry.update();
     }
@@ -508,8 +508,8 @@ public class leftAuto extends OpMode {
             } else {
                 collecting = true;
                 gripperRotationServoPosition=.5;
-                collectX=362; //og is +10 on x
-                collectY=-175; // og is +35 on y
+                collectX=362;
+                collectY=-175;
             }
         } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
             if (state != 0 && depositing == false) {
@@ -670,7 +670,7 @@ public class leftAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 3) {
-                if (timer.milliseconds() >= 60) {
+                if (timer.milliseconds() >= 40) {
                     gripperState="open";
                     retractAlignmentBar=retractAlignmentBarDelay;
                     timer.reset();
@@ -692,40 +692,49 @@ public class leftAuto extends OpMode {
                 else {
                     targetX = 224; // 264
                     targetY = -17;
+
+
                     state += 1;
                     alignmentBarServo.setPosition(alignmentBarUpPos);
                     timer.reset();
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds()>=1500) {
+                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds() >= 1500) {
                     state += 1;
-                    targetX = collectX;
-                    targetY = collectY;
+                    targetX = collectX - 120;
+                    targetY = collectY + 120;
                     gripperState = "closePrep";
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 600) {
+                if (timer.milliseconds() >= 350) {
+                    state+= 1;
+                    targetX = collectX;
+                    targetY = collectY;
+                    gripperState = "closePrep";
+                }
+            } else if (state == 3) {
+                if (timer.milliseconds() >= 700) {
                     gripperState = "closeTight";
                     state += 1;
                     timer.reset();
                 }
-            } else if(state == 3){
-                if (timer.milliseconds() >= 150) {
-                    targetX = 340; //340
-                    targetY = 0; //-17
+            } else if(state == 4){
+                if (timer.milliseconds() >= 120) {
+                    targetX = 350; //340
+                    targetY = 50; //-17
                     state+=1;
                     timer.reset();
                 }
-            } else if (state == 4) {
-                if (timer.milliseconds() >= 180) { //130
+            } else if (state == 5) {
+                if (timer.milliseconds() >= 250) { //130
                     collecting = false;
                 }
             }
 
         }
-        telemetry.addData("loopTime3", loopTime.milliseconds());
+        telemetry.addData("loopTime", loopTime.milliseconds());
         loopTime.reset();
         telemetry.addData("dtError", drive.getPoseEstimate());
         telemetry.addData("cyclePos", cycle_position.end());
@@ -740,7 +749,6 @@ public class leftAuto extends OpMode {
         telemetry.addData("towerTarget", twTarget);
         telemetry.addData("towerError", twController.getPositionError());
         drive.update();
-        telemetry.addData("loopTime1", loopTime.milliseconds());
 
 
 
@@ -841,7 +849,6 @@ public class leftAuto extends OpMode {
         }
         gripperRotationServo.setPosition(gripperRotationServoPosition);
 
-        telemetry.addData("loopTime2", loopTime.milliseconds());
         telemetry.update();
 
     }
