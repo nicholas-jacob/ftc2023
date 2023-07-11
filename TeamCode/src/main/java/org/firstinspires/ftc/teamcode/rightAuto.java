@@ -709,7 +709,7 @@ public class rightAuto extends OpMode {
                 }
             } else if (state == 2) {
                 if (timer.milliseconds() >= 350) {
-                    state+=1;
+                    state+= 1;
                     targetX = collectX;
                     targetY = collectY;
                     gripperState = "closePrep";
@@ -722,8 +722,8 @@ public class rightAuto extends OpMode {
                 }
             } else if(state == 4){
                 if (timer.milliseconds() >= 120) {
-                    targetX = 340; //340
-                    targetY = 0; //-17
+                    targetX = 350;
+                    targetY = 50;
                     state+=1;
                     timer.reset();
                 }
