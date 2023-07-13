@@ -472,21 +472,19 @@ public class rightAuto extends OpMode {
                     state += 1;
                 }
             } else if (state == 2) {
-                if (timer.milliseconds()>300) {
+                if (timer.milliseconds()>300) { //300
                     gripperState = "closeTight";
                     state+=1;
                 }
             } else if (state == 3) {
-                if (timer.milliseconds()>600){
+                if (timer.milliseconds()>200){ //600
                     state+=1;
                     targetX=231;
                     targetY=515;
                     towerMaxPower=0;
                 }
             } else if (state == 4) {
-                if (withinTolerance(armController.getPositionError(), 5000, twController.getPositionError(), 10000)) {
-                    state += 1;
-                }
+                state += 1;
             } else if (state == 5) {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
@@ -677,8 +675,14 @@ public class rightAuto extends OpMode {
                     state+=1;
                 }
             } else if (state == 4) {
-                if (timer.milliseconds() >= 40) {
-                    depositing = false;
+                if (phase == "deposit6"){
+                    if (timer.milliseconds() >= 80) {
+                        depositing = false;
+                    }
+                } else {
+                    if (timer.milliseconds() >= 40) {
+                        depositing = false;
+                    }
                 }
             }
 
@@ -700,7 +704,7 @@ public class rightAuto extends OpMode {
                 }
 
             } else if (state == 1) {
-                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds() >= 1500) {
+                if (withinTolerance(armController.getPositionError(), 40, twController.getPositionError(), 40) || timer.milliseconds() >= 1200) { //1500
                     state += 1;
                     targetX = collectX - 120;
                     targetY = collectY + 120;

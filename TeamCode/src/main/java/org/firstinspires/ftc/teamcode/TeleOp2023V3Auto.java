@@ -98,7 +98,7 @@ public class TeleOp2023V3Auto extends OpMode {
     public static double gripperRotationServoPosition=.5;
     //in distance away from 0.5;
     public static double gripperOpenPos=0.3;
-    public static double gripperHalfOpenPos=0.47;
+    public static double gripperHalfOpenPos=0.47; //0.47
     public static double gripperClosePos=0.71; //0.64
     public static double gripperCloseTight=0.71;
     public String gripperState="open";
