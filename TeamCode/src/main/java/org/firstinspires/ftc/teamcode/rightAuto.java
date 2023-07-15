@@ -126,7 +126,7 @@ public class rightAuto extends OpMode {
     public static double rightOdoLiftPos=0.48;
     public static double wheelieBarPosition=.56;
     private int retractAlignmentBar = 0;
-    public static int retractAlignmentBarDelay=5;
+    public static int retractAlignmentBarDelay=1;
     public static double alignmentBarDownPos = 0.768;
     public static double alignmentBarMidPos = 0.4;
     public static double alignmentBarUpPos = 0.25;
@@ -307,8 +307,8 @@ public class rightAuto extends OpMode {
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineToConstantHeading(new Vector2d(34.5,-46))
                 .splineToSplineHeading(new Pose2d(36.5,-24, Math.toRadians(70)), Math.toRadians(70))
-                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-14.0362))//og angle is 194.0362
-                .splineToConstantHeading(new Vector2d(57.3, -8.2), Math.toRadians(90-14.0362))
+                .splineTo(new Vector2d(49.5, -14), Math.toRadians(-15.0362))//og angle is 194.0362
+                .splineToConstantHeading(new Vector2d(57.3, -7.8), Math.toRadians(90-14.0362))
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -631,7 +631,7 @@ public class rightAuto extends OpMode {
 
         if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
             if (state == 0) { //to above junction
-                if (timeSinceStart.milliseconds()>=24500){
+                if (timeSinceStart.milliseconds()>=24550){
                     state=50;
                     depositing = false;
                 } else {
@@ -650,7 +650,7 @@ public class rightAuto extends OpMode {
                 int twTimeout=1000;
                 if (phase == "deposit1") {
                     twToleranceForDeposit = 50;
-                    twTimeout=1500;
+                    twTimeout=1000;
                 }
                 if (withinTolerance(armController.getPositionError(), 20, twController.getPositionError(), twToleranceForDeposit) || timer.milliseconds()>twTimeout)  {
                     state += 1;
@@ -668,7 +668,7 @@ public class rightAuto extends OpMode {
                     timer.reset();
                 }
             } else if (state == 3) {
-                if (timer.milliseconds() >= 40) {
+                if (timer.milliseconds() >= 70) {
                     gripperState="open";
                     retractAlignmentBar=retractAlignmentBarDelay;
                     timer.reset();
@@ -676,11 +676,11 @@ public class rightAuto extends OpMode {
                 }
             } else if (state == 4) {
                 if (phase == "deposit6"){
-                    if (timer.milliseconds() >= 80) {
+                    if (timer.milliseconds() >= 20) {
                         depositing = false;
                     }
                 } else {
-                    if (timer.milliseconds() >= 40) {
+                    if (timer.milliseconds() >= 20) {
                         depositing = false;
                     }
                 }
@@ -689,7 +689,7 @@ public class rightAuto extends OpMode {
         }
         if (collecting == true) { //collect macro if collecting is set to true it will caryout nesecary collecting steps then when finish sets colecting to false
             if (state == 0) { //to above junction
-                if (timeSinceStart.milliseconds()>=24500){
+                if (timeSinceStart.milliseconds()>=24550){
                     state=50;
                     collecting = false;
                 }
