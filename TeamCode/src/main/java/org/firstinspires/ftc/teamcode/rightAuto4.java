@@ -548,6 +548,8 @@ public class rightAuto4 extends OpMode {
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
+                wheelieBarPosition=0.56;
+                wheelieBarServo.setPosition(wheelieBarPosition);
             } else {
                 depositing = true;
             }

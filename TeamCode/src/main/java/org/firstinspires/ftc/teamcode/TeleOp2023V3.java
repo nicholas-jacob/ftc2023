@@ -321,7 +321,7 @@ public class TeleOp2023V3 extends OpMode {
                 gripperRotationServoPosition=0.5;
             } else{
                 targetX=-119;
-                targetY=678; //og 687
+                targetY=678;
                 alignmentBarServo.setPosition(alignmentBarMidPos);
                 gripperRotationServoPosition=0.5;
             }

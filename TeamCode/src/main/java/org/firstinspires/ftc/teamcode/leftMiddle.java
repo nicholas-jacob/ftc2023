@@ -54,7 +54,7 @@ import java.util.Objects;
 
 
 @Autonomous
-public class leftAuto4 extends OpMode {
+public class leftMiddle extends OpMode {
 
 
 
@@ -290,9 +290,8 @@ public class leftAuto4 extends OpMode {
 
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineToConstantHeading(new Vector2d(-34.5,-46))
-                .splineToSplineHeading(new Pose2d(-36.5,-24, Math.toRadians(110)), Math.toRadians(110))
-                .splineTo(new Vector2d(-49.5, -14), Math.toRadians(194.0362))//og angle is 194.0362
-                .splineToConstantHeading(new Vector2d(-58.4, -7.8), Math.toRadians(90+14.0362))
+                .splineToSplineHeading(new Pose2d(-36.5,-24, Math.toRadians(270)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(-36, -12, Math.toRadians(225)), Math.toRadians(90))//og angle is 194.0362
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -473,78 +472,10 @@ public class leftAuto4 extends OpMode {
                 drive.followTrajectoryAsync(cycle_position);
                 state += 1;
             } else if (state == 7) { //found bug caused used to be 4 not 5
-                phase = "deposit1";
+                phase = "deposit";
                 state = 0;
             }
         } else if (Objects.equals(phase, "deposit1")) { //deposit cone #1
-            if (state != 0 && depositing == false) {
-                phase = "collect2";
-                state = 0;
-            } else {
-                depositing = true;
-            }
-        } else if (Objects.equals(phase, "collect2")){ //collect cone #2
-            if (state != 0 && collecting == false) {
-                phase = "deposit2";
-                state = 0;
-            } else {
-                collecting = true;
-                gripperRotationServoPosition=.5;
-                collectX=362;
-                collectY=-175;
-            }
-        } else if (Objects.equals(phase, "deposit2")) { //deposit cone #2
-            if (state != 0 && depositing == false) {
-                phase = "collect3";
-                state = 0;
-            } else {
-                depositing = true;
-            }
-        } else if (Objects.equals(phase, "collect3")){ //collect cone #3
-            if (state != 0 && collecting == false) {
-                phase = "deposit3";
-                state = 0;
-            } else {
-                collecting = true;
-                gripperRotationServoPosition=.5;
-                collectX=362-5;
-                collectY=-175-33;
-            }
-        } else if (Objects.equals(phase, "deposit3")) { //deposit cone #3
-            if (state != 0 && depositing == false) {
-                phase = "collect4";
-                state = 0;
-            } else {
-                depositing = true;
-            }
-        } else if (Objects.equals(phase, "collect4")){ //collect cone #4
-            if (state != 0 && collecting == false) {
-                phase = "deposit4";
-                state = 0;
-            } else {
-                collecting = true;
-                gripperRotationServoPosition=.5;
-                collectX=362-5*2;
-                collectY=-175-33*2;
-            }
-        }else if (Objects.equals(phase, "deposit4")) { //deposit cone #4
-            if (state != 0 && depositing == false) {
-                phase = "collect5";
-                state = 0;
-            } else {
-                depositing = true;
-            }
-        } else if (Objects.equals(phase, "collect5")){ //collect cone #5
-            if (state != 0 && collecting == false) {
-                phase = "deposit5";
-                state = 0;
-            } else {
-                collecting = true;
-                gripperRotationServoPosition=0.5;
-                collectX=362-5*3;
-                collectY=-175-33*3;
-            }
-        }else if (Objects.equals(phase, "deposit5")) { //deposit cone #5
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
@@ -553,25 +484,6 @@ public class leftAuto4 extends OpMode {
             } else {
                 depositing = true;
             }
-//        } else if (Objects.equals(phase, "collect6")){ //collect cone #6
-//            if (state != 0 && collecting == false) {
-//                phase = "deposit6";
-//                state = 0;
-//            } else {
-//                collecting = true;
-//                gripperRotationServoPosition=0.5;
-//                collectX=362-5*4;
-//                collectY=-175-33*4;
-//            }
-//        }else if (Objects.equals(phase, "deposit6")) { //deposit cone #6
-//            if (state != 0 && depositing == false) {
-//                phase = "park";
-//                state = 0;
-//                wheelieBarPosition=0.56;
-//                wheelieBarServo.setPosition(wheelieBarPosition);
-//            } else {
-//                depositing = true;
-//            }
         }else if (Objects.equals(phase, "park")) {
             if (state == 0) {
                 targetX=250;
@@ -617,18 +529,13 @@ public class leftAuto4 extends OpMode {
 
         if (depositing == true) { //deposit macro if depsiting is set to true it will caryout nesecary deposting steps then when finish sets depositng to false
             if (state == 0) { //to above junction
-                if (timeSinceStart.milliseconds()>=24550){
-                    state=50;
-                    depositing = false;
-                } else {
-                    towerMaxPower=1.5;
-                    targetX = -516.6285;
-                    targetY = 795.3638;
-                    state += 1;
-                    timer.reset();
-                }
+                towerMaxPower=1.5;
+                targetX=-119;
+                targetY=678;
+                state += 1;
+                timer.reset();
             } else if (state == 1) {
-                if (timer.milliseconds() > 500) {
+                if (timer.milliseconds() > 100) {
                     gripperRotationServoPosition = 0.5;
                     alignmentBarServo.setPosition(alignmentBarMidPos);
                 }
@@ -645,16 +552,14 @@ public class leftAuto4 extends OpMode {
                     timer.reset();
                 }
             } else if (state == 2) {
-                if (timer.milliseconds() >= 650) {//drop //450
-                    targetX = -516.6285;
-                    targetY = 795.3638-125;
-                    //targetX = -521.769;
-                    //targetY = 779.3487-100; //779.3487-100
+                if (timer.milliseconds() >= 1000) {//drop //450
+                    targetX=-119;
+                    targetY=678-125;
                     state+=1;
                     timer.reset();
                 }
             } else if (state == 3) {
-                if (timer.milliseconds() >= 70) {
+                if (timer.milliseconds() >= 200) {
                     gripperState="open";
                     retractAlignmentBar=retractAlignmentBarDelay;
                     timer.reset();
@@ -662,11 +567,11 @@ public class leftAuto4 extends OpMode {
                 }
             } else if (state == 4) {
                 if (phase == "deposit6"){
-                    if (timer.milliseconds() >= 20) {
+                    if (timer.milliseconds() >= 200) {
                         depositing = false;
                     }
                 } else {
-                    if (timer.milliseconds() >= 20) {
+                    if (timer.milliseconds() >= 200) {
                         depositing = false;
                     }
                 }
