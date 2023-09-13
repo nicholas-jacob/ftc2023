@@ -291,7 +291,7 @@ public class leftMiddle extends OpMode {
         cycle_position = drive.trajectoryBuilder(startPose)
                 .lineToConstantHeading(new Vector2d(-34.5,-46))
                 .splineToSplineHeading(new Pose2d(-36.5,-24, Math.toRadians(270)), Math.toRadians(90))
-                .splineToSplineHeading(new Pose2d(-36, -12, Math.toRadians(225)), Math.toRadians(90))//og angle is 194.0362
+                .splineToSplineHeading(new Pose2d(-36, -11, Math.toRadians(225)), Math.toRadians(90))//og angle is 194.0362
                 .addDisplacementMarker(() -> {
                     state+=1;
                     wheelieBarPosition=0.03;
@@ -312,25 +312,19 @@ public class leftMiddle extends OpMode {
                     drive.leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     drive.leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 })
-                .lineToSplineHeading(new Pose2d(-59, -11.75, Math.toRadians(180)))
+                .lineToSplineHeading(new Pose2d(-36, 12, Math.toRadians(360)))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
         leftPark = drive.trajectoryBuilder(prePark.end())
-                .lineToConstantHeading(new Vector2d(-36, -11.75))
+                .lineToConstantHeading(new Vector2d(-36-48, 12))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
                 .build();
         middlePark = drive.trajectoryBuilder(prePark.end())
-                .lineToConstantHeading(new Vector2d(-12, -11.75))
-                .addDisplacementMarker(() -> {
-                    state+=1;
-                })
-                .build();
-        rightPark = drive.trajectoryBuilder(prePark.end())
-                .lineToConstantHeading(new Vector2d(12, -11.75))
+                .lineToConstantHeading(new Vector2d(-36-24, 12))
                 .addDisplacementMarker(() -> {
                     state+=1;
                 })
@@ -475,7 +469,7 @@ public class leftMiddle extends OpMode {
                 phase = "deposit";
                 state = 0;
             }
-        } else if (Objects.equals(phase, "deposit1")) { //deposit cone #1
+        } else if (Objects.equals(phase, "deposit")) { //deposit cone #1
             if (state != 0 && depositing == false) {
                 phase = "park";
                 state = 0;
@@ -503,8 +497,7 @@ public class leftMiddle extends OpMode {
                     drive.followTrajectoryAsync(middlePark);
                     state+=1;
                 } else if (signal==right){
-                    drive.followTrajectoryAsync(rightPark);
-                    state+=1;
+                    state+=2;
                 }
             } else if (state == 5) {
                 phase = "finish";
@@ -531,7 +524,7 @@ public class leftMiddle extends OpMode {
             if (state == 0) { //to above junction
                 towerMaxPower=1.5;
                 targetX=-119;
-                targetY=678;
+                targetY=698;
                 state += 1;
                 timer.reset();
             } else if (state == 1) {
