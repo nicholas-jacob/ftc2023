@@ -95,10 +95,10 @@ public class TeleOp2023V3 extends OpMode {
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=.5;
     //in distance away from 0.5;
-    public static double gripperOpenPos=0.3; //important //192.168.43.1:8080/dash
-    public static double gripperHalfOpenPos=0.47;
-    public static double gripperClosePos=0.71;
-    public static double gripperCloseTight=0.71;
+    public static double gripperOpenPos=0.65;
+    public static double gripperHalfOpenPos=0.57;
+    public static double gripperClosePos=0.45;
+    public static double gripperCloseTight=0.4;
     public String gripperState="open";
     private static boolean gp2ANotPressed;
 

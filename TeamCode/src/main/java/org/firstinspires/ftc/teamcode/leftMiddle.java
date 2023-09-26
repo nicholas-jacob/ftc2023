@@ -116,12 +116,12 @@ public class leftMiddle extends OpMode {
     public static double alignmentBarUpPos = 0.25;
     private InverseKinematics inverseKinematics;
     public static double gripperRotationServoPosition=0.5;
-    public static double gripperOpenPos=0.3; ////important
-    public static double gripperHalfOpenPos=0.47;
-    public static double gripperClosePos=0.64;
-    public static double gripperCloseTight=0.71;
-    public static double gripperContainmentpos=0.47;
-    public static double gripperClosePrep=0.42;
+    public static double gripperOpenPos=0.65;
+    public static double gripperHalfOpenPos=0.57;
+    public static double gripperClosePos=0.45;
+    public static double gripperCloseTight=0.4;
+    public static double gripperContainmentpos=0.55;
+    public static double gripperClosePrep=0.50;
     public String gripperState="open";
 
 
